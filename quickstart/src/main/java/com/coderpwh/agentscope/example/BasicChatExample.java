@@ -24,19 +24,19 @@ public class BasicChatExample {
         ReActAgent agent = ReActAgent
                 .builder()
                 .name("Assistant").
-                sysPrompt("You are a helpful AI assistant. Be friendly and concise.")
+                sysPrompt("您是一个乐于助人的AI助手,请保持友好且简洁!")
                 .model(
                         DashScopeChatModel.builder()
-                        .apiKey(apiKey)
-                        .modelName("qwen-plus")
-                        .stream(true)
-                        .enableThinking(true)
-                        .formatter(new DashScopeChatFormatter())
-                        .defaultOptions(
-                                GenerateOptions.builder()
-                                        .thinkingBudget(1024)
-                                        .build())
-                        .build())
+                                .apiKey(apiKey)
+                                .modelName("qwen-plus")
+                                .stream(true)
+                                .enableThinking(true)
+                                .formatter(new DashScopeChatFormatter())
+                                .defaultOptions(
+                                        GenerateOptions.builder()
+                                                .thinkingBudget(1024)
+                                                .build())
+                                .build())
                 .memory(new InMemoryMemory())
                 .toolkit(new Toolkit())
                 .build();

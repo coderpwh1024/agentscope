@@ -22,7 +22,7 @@ public class ExampleUtils {
 
 
     public static String getDashScopeApiKey() throws IOException {
-        return getApiKey("DASHSCOPE_API_KEY", "DashScope", "https://dashscope.console.aliyun.com/apiKey");
+        return getApiKey("", "DashScope", "https://dashscope.console.aliyun.com/apiKey");
     }
 
     public static String getOpenAIApiKey() throws IOException {
