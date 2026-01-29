@@ -30,7 +30,8 @@ public class AgentSkillExample {
 
 
         AgentSkill dataSkill = createDataAnalysisSkill();
-        skillBox.registration().tool(new ).skill(dataSkill).apply();
+         // TODO
+//        skillBox.registration().tool( ).skill(dataSkill).apply();
 
 
 
