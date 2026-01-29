@@ -30,6 +30,8 @@ public class AgentSkillExample {
 
 
         AgentSkill dataSkill = createDataAnalysisSkill();
+        skillBox.registration().tool(new ).skill(dataSkill).apply();
+
 
 
     }
@@ -223,6 +225,11 @@ public class AgentSkillExample {
         System.out.println("5. \"比较不同产品的表现\"");
         System.out.println("\n==================================\n");
     }
+
+
+
+
+
 
 
 }
