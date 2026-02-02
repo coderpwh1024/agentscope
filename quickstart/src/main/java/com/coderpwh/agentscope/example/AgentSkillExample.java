@@ -1,11 +1,13 @@
 package com.coderpwh.agentscope.example;
 
-import java.awt.*;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import io.agentscope.core.skill.AgentSkill;
 import io.agentscope.core.skill.SkillBox;
+import io.agentscope.core.tool.Tool;
 import io.agentscope.core.tool.Toolkit;
 import io.agentscope.core.skill.util.SkillUtil;
 
@@ -30,9 +32,8 @@ public class AgentSkillExample {
 
 
         AgentSkill dataSkill = createDataAnalysisSkill();
-         // TODO
+        // TODO
 //        skillBox.registration().tool( ).skill(dataSkill).apply();
-
 
 
     }
@@ -228,9 +229,59 @@ public class AgentSkillExample {
     }
 
 
+    public static class DataAnalysisTools {
+
+        private static final List<SalesRecord> SALES_DATA = Arrays.asList(
+                new SalesRecord("2024-01", "Laptop", 1200.00, 5),
+                new SalesRecord("2024-01", "Mouse", 25.00, 20),
+                new SalesRecord("2024-01", "Keyboard", 75.00, 15),
+                new SalesRecord("2024-02", "Laptop", 1200.00, 8),
+                new SalesRecord("2024-02", "Mouse", 25.00, 25),
+                new SalesRecord("2024-02", "Keyboard", 75.00, 18),
+                new SalesRecord("2024-03", "Laptop", 1200.00, 12),
+                new SalesRecord("2024-03", "Mouse", 25.00, 30),
+                new SalesRecord("2024-03", "Keyboard", 75.00, 22),
+                new SalesRecord("2024-04", "Laptop", 1200.00, 10),
+                new SalesRecord("2024-04", "Mouse", 25.00, 28),
+                new SalesRecord("2024-04", "Keyboard", 75.00, 20));
 
 
+        @Tool(name = "load_sales_data", description = "Load sample sales data for analysis. Returns dataset with columns: date, product,amount,quantity")
+        public String loadSalesData() {
 
+
+        }
+
+
+    }
+
+    static class SalesRecord {
+        String data;
+
+        String product;
+
+        double amount;
+
+        int quantity;
+
+        SalesRecord(String data, String product, double amount, int quantity) {
+            this.data = data;
+            this.product = product;
+            this.amount = amount;
+            this.quantity = quantity;
+        }
+
+    }
+
+    static class ProductStats {
+        double revenue = 0;
+        int units = 0;
+
+        void add(double rev, int qty) {
+            revenue += rev;
+            units += qty;
+        }
+    }
 
 
 }
