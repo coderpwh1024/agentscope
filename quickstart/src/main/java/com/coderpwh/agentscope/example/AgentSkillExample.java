@@ -248,8 +248,22 @@ public class AgentSkillExample {
 
         @Tool(name = "load_sales_data", description = "Load sample sales data for analysis. Returns dataset with columns: date, product,amount,quantity")
         public String loadSalesData() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("销售数据加载成功");
+            sb.append("========================");
+            sb.append(String.format("Total Records: %d\n", SALES_DATA.size()));
+            sb.append("记录为:\n");
+            sb.append("--------------------------------------------------------\n");
 
-
+            for (int i = 0; i < Math.min(5, SALES_DATA.size()); i++) {
+                SalesRecord record = SALES_DATA.get(i);
+                sb.append(String.format("日期: %s, 产品: %s, 金额: %.2f, 数量: %d\n", record.data, record.product, record.amount, record.quantity));
+            }
+            sb.append("日期:");
+            sb.append("日期范围:2024-01 to 2024-04");
+            sb.append("产品:Laptop, Mouse, Keyboard\n");
+            sb.append("字段: date,product,amount,quantity");
+            return  sb.toString();
         }
 
 
