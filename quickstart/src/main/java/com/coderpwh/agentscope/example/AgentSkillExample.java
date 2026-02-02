@@ -4,6 +4,10 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import io.agentscope.core.ReActAgent;
+import io.agentscope.core.formatter.dashscope.DashScopeChatFormatter;
+import io.agentscope.core.memory.InMemoryMemory;
+import io.agentscope.core.model.DashScopeChatModel;
 import io.agentscope.core.skill.AgentSkill;
 import io.agentscope.core.skill.SkillBox;
 import io.agentscope.core.tool.Tool;
@@ -23,6 +27,30 @@ public class AgentSkillExample {
 
         Toolkit toolkit = new Toolkit();
         SkillBox skillBox = new SkillBox(toolkit);
+        setupDataAnalysisSkills(toolkit, skillBox);
+
+        ReActAgent agent = ReActAgent.builder()
+                .name("DataAnalyst")
+                .sysPrompt(buildSystemPrompt())
+                .model(
+                        DashScopeChatModel.builder()
+                                .apiKey(apikey)
+                                .modelName("qwen-max")
+                                .stream(true).enableThinking(true)
+                                .formatter(new DashScopeChatFormatter())
+                                .build()
+
+                )
+                .toolkit(toolkit)
+                .skillBox(skillBox)
+                .memory(new InMemoryMemory())
+                .build();
+
+
+        // 打印
+        printExampleQueries();
+
+        ExampleUtils.startChat(agent);
 
 
     }
@@ -32,8 +60,19 @@ public class AgentSkillExample {
 
 
         AgentSkill dataSkill = createDataAnalysisSkill();
-        // TODO
-//        skillBox.registration().tool( ).skill(dataSkill).apply();
+        // TOOL 工具
+        skillBox.registration().tool(new DataAnalysisTools()).skill(dataSkill).apply();
+
+        System.out.println("✓ 已注册技能: " + dataSkill.getName());
+        System.out.println("  描述: " + dataSkill.getDescription());
+        System.out.println("  资源: " + dataSkill.getResources().size() + " 个文件");
+        System.out.println("\n✓ 已注册数据分析工具:");
+        System.out.println("  - load_sales_data: 加载示例销售数据");
+        System.out.println("  - calculate_statistics: 计算平均值、中位数、标准差");
+        System.out.println("  - analyze_trend: 分析数据趋势");
+        System.out.println("  - generate_chart: 生成可视化描述");
+        System.out.println("  - create_report: 创建分析报告");
+        System.out.println("\n✓ 技能加载工具将在构建代理时自动注册\n");
 
 
     }
