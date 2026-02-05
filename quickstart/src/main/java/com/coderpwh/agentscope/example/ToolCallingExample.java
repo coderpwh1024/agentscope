@@ -22,7 +22,7 @@ public class ToolCallingExample {
         String apiKey = ExampleUtils.getDashScopeApiKey();
 
         Toolkit toolkit = new Toolkit();
-        toolkit.registerTool(new);
+        toolkit.registerTool();
 
         System.out.println("已注册的工具：");
         System.out.println("  - get_current_time: 获取指定时区的当前时间");
@@ -35,14 +35,45 @@ public class ToolCallingExample {
         @Tool(name = "get_current_time", description = "Get the current time in a specific timezone")
         public String getCurrentTime(@ToolParam(name = "timezone", description = "Timezone name, e.g., 'Asia/Tokyo', 'America/New_York','Europe/London'") String timezone) {
 
+            try {
+                ZoneId zoneId = ZoneId.of(timezone);
+                LocalDateTime now = LocalDateTime.now(zoneId);
 
-            ZoneId zoneId = ZoneId.of(timezone);
-            LocalDateTime now = LocalDateTime.now(zoneId);
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                return String.format("The current time in %s is %s", timezone, now.format(formatter));
+            } catch (Exception e) {
+                return "错误：无效的时区。请尝试 'Asia/Tokyo' 或 'America/New_York'";
+            }
+        }
 
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            return String.format("The current time in %s is %s", timezone, now.format(formatter));
+        @Tool(name = "calculate", description = "Calculate simple math expressions")
+        public String calculate(@ToolParam(name = "expression", description = "Math expression to evaluate,e.g. '123+456','10*20'") String expression) {
+            try {
+                expression = expression.replaceAll("\\s+", "");
+                double result;
+                if (expression.contains("+")) {
+                    String[] parts = expression.split("\\+");
+                    result = Double.parseDouble(parts[0]) + Double.parseDouble(parts[1]);
+                } else if (expression.contains("-")) {
+                    String[] parts = expression.split("-");
+                    result = Double.parseDouble(parts[0]) - Double.parseDouble(parts[1]);
+                } else if (expression.contains("*")) {
+                    String[] parts = expression.split("\\*");
+                    result = Double.parseDouble(parts[0]) * Double.parseDouble(parts[1]);
+                } else if (expression.contains("/")) {
+                    String[] parts = expression.split("/");
+                    result = Double.parseDouble(parts[0]) / Double.parseDouble(parts[1]);
+                } else {
+                    return "Error: Unsupported operation. Use +, -, *, or /";
+                }
+
+                return String.format("%s = %.2f", expression, result);
+            } catch (Exception e) {
+                return "错误：表达式无效。示例：'123 + 456'";
+            }
 
         }
+
 
     }
 
