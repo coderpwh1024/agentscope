@@ -9,7 +9,6 @@ import io.agentscope.core.tool.ToolParam;
 import io.agentscope.core.tool.Toolkit;
 
 import java.io.IOException;
-import java.text.DateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -124,12 +123,6 @@ public class ToolCallingExample {
                         query, query, query, query);
             }
         }
-
-
     }
-
-
-}
-
 
 }
