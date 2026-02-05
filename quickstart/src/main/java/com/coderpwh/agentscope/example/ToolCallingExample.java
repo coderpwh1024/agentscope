@@ -1,5 +1,9 @@
 package com.coderpwh.agentscope.example;
 
+import io.agentscope.core.ReActAgent;
+import io.agentscope.core.formatter.dashscope.DashScopeChatFormatter;
+import io.agentscope.core.memory.InMemoryMemory;
+import io.agentscope.core.model.DashScopeChatModel;
 import io.agentscope.core.tool.Tool;
 import io.agentscope.core.tool.ToolParam;
 import io.agentscope.core.tool.Toolkit;
@@ -22,12 +26,30 @@ public class ToolCallingExample {
         String apiKey = ExampleUtils.getDashScopeApiKey();
 
         Toolkit toolkit = new Toolkit();
-        toolkit.registerTool();
+        toolkit.registerTool(new SimpleTools());
 
         System.out.println("已注册的工具：");
         System.out.println("  - get_current_time: 获取指定时区的当前时间");
         System.out.println("  - calculate: 计算简单的数学表达式");
         System.out.println("  - search: 模拟搜索功能\n");
+
+
+        ReActAgent agent = ReActAgent.builder()
+                .name("ToolAgent")
+                .sysPrompt("你是一个可以使用工具的智能助手,需要时请使用工具来准确回答问题,每次使用工具时都要向用户解释你正在做什么")
+                .model(DashScopeChatModel.builder()
+                        .apiKey(apiKey)
+                        .modelName("qwen-max")
+                        .stream(true)
+                        .enableThinking(false)
+                        .formatter(new DashScopeChatFormatter())
+                        .build())
+                .toolkit(toolkit)
+                .memory(new InMemoryMemory())
+                .build();
+
+        ExampleUtils.startChat(agent);
+
     }
 
 
