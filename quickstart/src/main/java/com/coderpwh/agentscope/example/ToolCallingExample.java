@@ -74,8 +74,40 @@ public class ToolCallingExample {
 
         }
 
+        @Tool(name = "search", description = "Simulate a search function")
+        public String search(@ToolParam(name = "query", description = "Search query") String query) {
+
+            String lowerQuery = query.toLowerCase();
+            if (lowerQuery.contains("ai") || lowerQuery.contains("artificial intelligence")) {
+                return "关于'人工智能'的搜索结果：\n"
+                        + "1. AI 是机器对人类智能的模拟\n"
+                        + "2. 常见的 AI 应用：聊天机器人、图像识别、自动驾驶汽车\n"
+                        + "3. 主要的 AI 技术：机器学习、深度学习、自然语言处理";
+            } else if (lowerQuery.contains("java")) {
+                return "关于'Java'的搜索结果：\n"
+                        + "1. Java 是一种高级的面向对象编程语言\n"
+                        + "2. 由 Sun Microsystems 公司于 1995 年首次发布\n"
+                        + "3. 以'一次编写，到处运行'（WORA）理念而闻名";
+            } else if (lowerQuery.contains("agentscope")) {
+                return "关于'AgentScope'的搜索结果：\n"
+                        + "1. AgentScope 是一个面向智能体的编程框架\n"
+                        + "2. 支持使用多智能体系统构建大语言模型应用\n"
+                        + "3. 提供透明且灵活的智能体开发方式";
+            } else {
+                return String.format(
+                        "关于'%s'的搜索结果：\n"
+                                + "1. 关于 %s 的结果（模拟）\n"
+                                + "2. 更多关于 %s 的信息（模拟）\n"
+                                + "3. 与 %s 相关的主题（模拟）",
+                        query, query, query, query);
+            }
+        }
+
 
     }
+
+
+}
 
 
 }
