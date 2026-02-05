@@ -100,6 +100,7 @@ public class ToolCallingExample {
 
             String lowerQuery = query.toLowerCase();
             if (lowerQuery.contains("ai") || lowerQuery.contains("artificial intelligence")) {
+                System.out.println("关于'人工智能'的搜索结果：");
                 return "关于'人工智能'的搜索结果：\n"
                         + "1. AI 是机器对人类智能的模拟\n"
                         + "2. 常见的 AI 应用：聊天机器人、图像识别、自动驾驶汽车\n"
