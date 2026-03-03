@@ -30,8 +30,7 @@ public class FanoutPipelineExample {
         String apiKey = ExampleUtils.getDashScopeApiKey();
 
         System.out.println("开始执行...");
-//        ReActAgent techExpert =createTechExpert()
-
+        ReActAgent techExpert =createTechExpert(apiKey);
 
     }
 
