@@ -78,6 +78,48 @@ public class ToolGroupExample {
         }
     }
 
+    public static class MathTools {
+
+        /**
+         * 阶乘计算
+         *
+         * @param n
+         * @return
+         */
+        @Tool(name = "factorial", description = "Calculate factorial of a number")
+        public String factorial(@ToolParam(name = "n", description = "Number to calculate factorial") Integer n) {
+
+            if (n < 0) {
+                return "Error: Factorial not defined for negative numbers";
+            }
+
+            if (n > 20) {
+                return "Error: Number too large (max 20)";
+            }
+            long result = 1;
+
+            for (int i = 2; i <= n; i++) {
+                result *= i;
+            }
+
+            return String.format("factorial(%d) = %d", n, result);
+        }
+
+
+        @Tool(name = "is_prime", description = "Check if a number is prime")
+        public String isPrime(@ToolParam(name = "n", description = "Number to check") Integer n) {
+            if (n < 2) {
+                return n + "is not a prime number";
+            }
+
+            for (int i = 2; i <= Math.sqrt(n); i++) {
+                if (n % i == 0) {
+                    return n + "is not a prime number";
+                }
+            }
+            return n + "is a prime number";
+        }
+    }
 
 
 
