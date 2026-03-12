@@ -29,7 +29,7 @@ public class ToolGroupExample {
         toolkit.registration().tool(new FileTools()).group("file_ops").apply();
 
         // TODO
-        return  null;
+        return null;
 
     }
 
@@ -49,19 +49,38 @@ public class ToolGroupExample {
         }
 
         @Tool(name = "write_file", description = "Write contents to a file")
-        public String writeFile(@ToolParam(name="path",description = "File path to write") String path,
-                                @ToolParam(name="content",description = "Content to write") String content) {
+        public String writeFile(@ToolParam(name = "path", description = "File path to write") String path,
+                                @ToolParam(name = "content", description = "Content to write") String content) {
 
             try {
-                Files.writeString(Paths.get(path),content);
-                return "Successfully wrote to"+path;
-            }catch (Exception e){
+                Files.writeString(Paths.get(path), content);
+                return "Successfully wrote to" + path;
+            } catch (Exception e) {
                 return "Error writing file:" + e.getMessage();
             }
 
         }
 
 
+        @Tool(name = "list_files", description = "List files in a directory")
+        public String listFiles(@ToolParam(name = "directory", description = "Directory path") String directory) {
+            try {
+                Path dir = Paths.get(directory);
+                if (!Files.isDirectory(dir)) {
+                    return "Error:Not a directory:" + directory;
+                }
+                StringBuilder result = new StringBuilder("Files in " + directory + ":\n");
+                Files.list(dir).forEach(path -> result.append(" -" + path.getFileName().toString() + "\n"));
+                return result.toString();
+            } catch (Exception e) {
+                return "Error listing directory: " + e.getMessage();
+            }
+        }
     }
+
+
+
+
+
 
 }
