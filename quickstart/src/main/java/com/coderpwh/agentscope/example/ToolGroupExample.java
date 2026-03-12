@@ -23,7 +23,7 @@ public class ToolGroupExample {
 
     }
 
-    private static Toolkit configureToolkit() {
+    private static Toolkit configureToolGroups() {
         Toolkit toolkit = new Toolkit();
         toolkit.createToolGroup("file_ops", "File system operations (read,write,list)", false);
         toolkit.registration().tool(new FileTools()).group("file_ops").apply();
@@ -121,8 +121,19 @@ public class ToolGroupExample {
         }
     }
 
+    public static class NetworkTools {
+        @Tool(name = "ping", description = "Ping a host")
+        public String ping(@ToolParam(name = "host", description = "Host to ping") String host) {
+            int latency = (int) (Math.random() * 100) + 10;
+            return String.format("Pinging %s: latency = %dms (simulated)", host, latency);
+        }
 
+        @Tool(name = "dns_lookup", description = "Look up DNS record (simulated)")
+        public String dnsLookup(@ToolParam(name = "domain", description = "Domain name") String domain) {
+            return String.format("DNS lookup for %s:\n  A record: 192.168.1.1 (simulated)", domain);
+        }
 
+    }
 
 
 }
