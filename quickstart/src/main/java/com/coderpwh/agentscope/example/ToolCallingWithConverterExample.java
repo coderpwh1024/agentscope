@@ -61,6 +61,8 @@ public class ToolCallingWithConverterExample {
                                 .formatter(new DashScopeChatFormatter())
                                 .build()
                 ).toolkit(toolkit).memory(new InMemoryMemory()).build();
+        // Start interactive chat
+        ExampleUtils.startChat(agent);
 
 
     }
