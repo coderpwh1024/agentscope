@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import io.agentscope.core.tool.Tool;
 import io.agentscope.core.tool.ToolParam;
-
+import io.agentscope.core.tool.DefaultToolResultConverter;
 import java.time.LocalDateTime;
 
 /**
@@ -32,6 +32,15 @@ public class ToolCallingWithConverterExample {
 
 
     }
+
+
+
+     public static  class  SensitiveDataMaskingConverter extends DefaultToolResultConverter{
+
+     }
+
+
+
 
     public static class UserInfo {
         @JsonPropertyDescription("User ID")
