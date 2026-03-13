@@ -6,10 +6,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import io.agentscope.core.ReActAgent;
+import io.agentscope.core.formatter.dashscope.DashScopeChatFormatter;
+import io.agentscope.core.memory.InMemoryMemory;
+import io.agentscope.core.model.DashScopeChatModel;
+import io.agentscope.core.tool.Toolkit;
 import io.agentscope.core.tool.Tool;
 import io.agentscope.core.tool.ToolParam;
-import io.agentscope.core.tool.Toolkit;
 
+/**
+ * @author coderpwh
+ */
 public class ToolGroupExample {
 
     public static void main(String[] args) throws IOException {
@@ -21,17 +28,89 @@ public class ToolGroupExample {
         String apiKey = ExampleUtils.getDashScopeApiKey();
 
 
+        Toolkit toolkit = configureToolGroups();
+        System.out.println("\\n=== Meta Tool Registered ===");
+        System.out.println(
+                "The agent now has access to 'reset_equipped_tools' meta-tool to autonomously");
+        System.out.println("activate tool groups based on task requirements.\n");
+
+        ReActAgent agent = ReActAgent.builder()
+                .name("SmartAgent")
+                .model(
+                        DashScopeChatModel.builder()
+                                .apiKey(apiKey)
+                                .modelName("qwen-max")
+                                .stream(true)
+                                .enableThinking(false)
+                                .formatter(new DashScopeChatFormatter())
+                                .build()
+                ).toolkit(toolkit)
+                .enableMetaTool(true)
+                .memory(new InMemoryMemory())
+                .build();
+
+        // Print example prompts
+        printExamplePrompts();
+
+        // Start interactive chat
+        ExampleUtils.startChat(agent);
+
     }
 
     private static Toolkit configureToolGroups() {
         Toolkit toolkit = new Toolkit();
+
         toolkit.createToolGroup("file_ops", "File system operations (read,write,list)", false);
         toolkit.registration().tool(new FileTools()).group("file_ops").apply();
 
-        // TODO
-        return null;
 
+        toolkit.createToolGroup("math_ops", "Mathematical operations (factorial,is_prime)", false);
+        toolkit.registration().tool(new MathTools()).group("math_ops").apply();
+
+
+        toolkit.createToolGroup("network_ops", "Network operations (ping,dns_lookup)", false);
+        toolkit.registration().tool(new NetworkTools()).group("network_ops").apply();
+
+        System.out.println("=== Tool Groups Created ===");
+        System.out.println("All tool groups start as INACTIVE.");
+        System.out.println("The agent will activate them as needed using reset_equipped_tools.\n");
+        System.out.println("Available groups:");
+        System.out.println("  - file_ops: File operations");
+        System.out.println("  - math_ops: Math calculations");
+        System.out.println("  - network_ops: Network tools\n");
+
+        return toolkit;
     }
+
+    private static void printExamplePrompts() {
+        System.out.println("=== Try These Example Prompts ===\n");
+
+        System.out.println("1. Single tool group activation:");
+        System.out.println("   > Calculate the factorial of 5");
+        System.out.println("   (Agent will activate math_ops, then use factorial tool)\n");
+
+        System.out.println("2. Different tool group:");
+        System.out.println("   > Ping google.com");
+        System.out.println("   (Agent will activate network_ops, then use ping tool)\n");
+
+        System.out.println("3. Another tool group:");
+        System.out.println("   > List files in /tmp");
+        System.out.println("   (Agent will activate file_ops, then use list_files tool)\n");
+
+        System.out.println("4. Multiple tool groups in one task:");
+        System.out.println("   > Calculate factorial of 7 and then ping github.com");
+        System.out.println("   (Agent will activate both math_ops and network_ops)\n");
+
+        System.out.println("5. Complex task requiring multiple operations:");
+        System.out.println("   > Check if 17 is prime, then list files in /tmp");
+        System.out.println("   (Agent will activate math_ops and file_ops)\n");
+
+        System.out.println("Watch as the agent:");
+        System.out.println("  1. Calls reset_equipped_tools to activate needed tool groups");
+        System.out.println("  2. Then calls the specific tools from activated groups");
+        System.out.println("==================================\n");
+    }
+
 
     public static class FileTools {
 
