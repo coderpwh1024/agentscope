@@ -30,16 +30,12 @@ public class ToolCallingWithConverterExample {
     }
 
 
-    //    @Tool(name = "get_user_info", description = "Retrieve user information by user ID", converter = SensitiveDataMaskingConverter.class)
+
     public static class SimpleTools {
+
+        @Tool(name = "get_user_info", description = "Retrieve user information by user ID", converter = SensitiveDataMaskingConverter.class)
         public UserInfo getUserInfo(@ToolParam(name = "userId", description = "User ID") String userId) {
-            return new UserInfo(
-                    userId,
-                    "John Doe",
-                    "john@example.com",
-                    "MySecretPassword123",
-                    "sk-1234567890abcdef",
-                    "4567-1234-8888-6666");
+            return new UserInfo(userId, "John Doe", "john@example.com", "MySecretPassword123", "sk-1234567890abcdef", "4567-1234-8888-6666");
         }
 
 
@@ -48,15 +44,7 @@ public class ToolCallingWithConverterExample {
 
     public static class SensitiveDataMaskingConverter extends DefaultToolResultConverter {
 
-        private static final Set<String> SENSITIVE_FIELDS = new HashSet<>(Arrays.asList(
-                "password",
-                "apikey",
-                "api_key",
-                "token",
-                "secret",
-                "creditcard",
-                "credit_card",
-                "ssn"));
+        private static final Set<String> SENSITIVE_FIELDS = new HashSet<>(Arrays.asList("password", "apikey", "api_key", "token", "secret", "creditcard", "credit_card", "ssn"));
 
         private static final Pattern CREDIT_CARD_PATTERN = Pattern.compile("\\d{4}[-\\s]?\\d{4}[-\\s]?\\d{4}[-\\s]?\\d{4}");
 
@@ -64,7 +52,6 @@ public class ToolCallingWithConverterExample {
         @Override
         protected ToolResultBlock serialize(Object result, Type returnType) {
             try {
-
                 ObjectMapper mapper = new ObjectMapper();
                 mapper.registerModule(new JavaTimeModule());
                 JsonNode node = mapper.valueToTree(result);
@@ -74,16 +61,7 @@ public class ToolCallingWithConverterExample {
                 Map<String, Object> schema = JsonSchemaUtils.generateSchemaFromType(returnType);
                 String schemaJson = JsonUtils.getJsonCodec().toJson(schema);
 
-                return ToolResultBlock
-                        .of(List.of(
-                                TextBlock
-                                        .builder()
-                                        .text("⚠️  Sensitive data has been masked\n\n" + json)
-                                        .build(),
-                                TextBlock.builder()
-                                        .text("\nResult JSON Schema:\n" + schemaJson)
-                                        .build()
-                        ));
+                return ToolResultBlock.of(List.of(TextBlock.builder().text("⚠️  Sensitive data has been masked\n\n" + json).build(), TextBlock.builder().text("\nResult JSON Schema:\n" + schemaJson).build()));
 
 
             } catch (Exception e) {
@@ -163,13 +141,7 @@ public class ToolCallingWithConverterExample {
         public UserInfo() {
         }
 
-        public UserInfo(
-                String userId,
-                String username,
-                String email,
-                String password,
-                String apiKey,
-                String creditCard) {
+        public UserInfo(String userId, String username, String email, String password, String apiKey, String creditCard) {
             this.userId = userId;
             this.username = username;
             this.email = email;
@@ -249,15 +221,10 @@ public class ToolCallingWithConverterExample {
         @JsonPropertyDescription("Product name, including brand and model information")
         private String product;
 
-        @JsonPropertyDescription(
-                "Order current status, possible values: 0=Pending Payment, 1=Paid, 2=Pending"
-                        + " Shipment, 3=Shipped, 4=In Transit, 5=Delivered, 6=Completed, 7=Cancelled,"
-                        + " 8=Refunding, 9=Refunded")
+        @JsonPropertyDescription("Order current status, possible values: 0=Pending Payment, 1=Paid, 2=Pending" + " Shipment, 3=Shipped, 4=In Transit, 5=Delivered, 6=Completed, 7=Cancelled," + " 8=Refunding, 9=Refunded")
         private Integer status;
 
-        @JsonPropertyDescription(
-                "Order total price in CNY (RMB), including all product prices and shipping fees,"
-                        + " excluding tax")
+        @JsonPropertyDescription("Order total price in CNY (RMB), including all product prices and shipping fees," + " excluding tax")
         private Double price;
 
         /**
@@ -268,15 +235,10 @@ public class ToolCallingWithConverterExample {
         @JsonPropertyDescription("Product origin, This refers to the product's country of origin.")
         private String address;
 
-        @JsonPropertyDescription(
-                "Quantity of products purchased, indicating the number of units of this product in"
-                        + " the order")
+        @JsonPropertyDescription("Quantity of products purchased, indicating the number of units of this product in" + " the order")
         private Integer quantity;
 
-        @JsonPropertyDescription(
-                "Order remarks description, filled by users for special delivery requirements or"
-                        + " product instructions, such as: handle with care, store at room temperature,"
-                        + " waterproof and sunproof, etc.")
+        @JsonPropertyDescription("Order remarks description, filled by users for special delivery requirements or" + " product instructions, such as: handle with care, store at room temperature," + " waterproof and sunproof, etc.")
         private String description;
 
         @JsonPropertyDescription("Order creation time, standard time format: yyyy-MM-dd HH:mm:ss")
@@ -292,16 +254,7 @@ public class ToolCallingWithConverterExample {
             this.price = price;
         }
 
-        public Order(
-                String id,
-                String userId,
-                String product,
-                Integer status,
-                Double price,
-                String address,
-                Integer quantity,
-                String description,
-                String createTime) {
+        public Order(String id, String userId, String product, Integer status, Double price, String address, Integer quantity, String description, String createTime) {
             this.id = id;
             this.userId = userId;
             this.product = product;
