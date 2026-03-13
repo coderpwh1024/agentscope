@@ -6,14 +6,20 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import io.agentscope.core.ReActAgent;
+import io.agentscope.core.formatter.dashscope.DashScopeChatFormatter;
+import io.agentscope.core.memory.InMemoryMemory;
 import io.agentscope.core.message.TextBlock;
 import io.agentscope.core.message.ToolResultBlock;
+import io.agentscope.core.model.DashScopeChatModel;
 import io.agentscope.core.tool.Tool;
 import io.agentscope.core.tool.ToolParam;
 import io.agentscope.core.tool.DefaultToolResultConverter;
+import io.agentscope.core.tool.Toolkit;
 import io.agentscope.core.util.JsonSchemaUtils;
 import io.agentscope.core.util.JsonUtils;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -25,10 +31,39 @@ import java.util.regex.Pattern;
 public class ToolCallingWithConverterExample {
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+        ExampleUtils.printWelcome(
+                "工具调用自定义 ToolResultConverter 示例",
+                "本示例演示如何为 Agent 配置工具和"
+                        + " ToolResultConverter。\n"
+                        + "该 Agent 可使用以下工具：get_user_info、list_orders。");
+
+        String apiKey = ExampleUtils.getDashScopeApiKey();
+
+        Toolkit toolkit = new Toolkit();
+        toolkit.registerTool(new SimpleTools());
+
+        System.out.println("已注册的工具：");
+        System.out.println("  - get_user_info：根据用户 ID 获取用户信息");
+        System.out.println("  - list_orders：根据用户 ID 获取订单列表\n");
+
+
+        ReActAgent agent = ReActAgent.builder()
+                .name("ToolAgent")
+                .sysPrompt("""
+                        你是一个可以使用工具的智能助手,在需要时使用工具来准确回答问题.在使用工具时，请始终说明你正在做什么""")
+                .model(
+                        DashScopeChatModel.builder()
+                                .apiKey(apiKey)
+                                .modelName("qwen-max")
+                                .stream(true)
+                                .enableThinking(false)
+                                .formatter(new DashScopeChatFormatter())
+                                .build()
+                ).toolkit(toolkit).memory(new InMemoryMemory()).build();
+
 
     }
-
 
 
     public static class SimpleTools {
