@@ -2,10 +2,22 @@ package com.coderpwh.agentscope.example;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import io.agentscope.core.message.TextBlock;
+import io.agentscope.core.message.ToolResultBlock;
 import io.agentscope.core.tool.Tool;
 import io.agentscope.core.tool.ToolParam;
 import io.agentscope.core.tool.DefaultToolResultConverter;
+import io.agentscope.core.util.JsonSchemaUtils;
+import io.agentscope.core.util.JsonUtils;
+
+import java.lang.reflect.Type;
 import java.time.LocalDateTime;
+import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * @author coderpwh
@@ -18,7 +30,7 @@ public class ToolCallingWithConverterExample {
     }
 
 
-//    @Tool(name = "get_user_info", description = "Retrieve user information by user ID", converter = SensitiveDataMaskingConverter.class)
+    //    @Tool(name = "get_user_info", description = "Retrieve user information by user ID", converter = SensitiveDataMaskingConverter.class)
     public static class SimpleTools {
         public UserInfo getUserInfo(@ToolParam(name = "userId", description = "User ID") String userId) {
             return new UserInfo(
@@ -34,12 +46,95 @@ public class ToolCallingWithConverterExample {
     }
 
 
+    public static class SensitiveDataMaskingConverter extends DefaultToolResultConverter {
 
-     public static  class  SensitiveDataMaskingConverter extends DefaultToolResultConverter{
+        private static final Set<String> SENSITIVE_FIELDS = new HashSet<>(Arrays.asList(
+                "password",
+                "apikey",
+                "api_key",
+                "token",
+                "secret",
+                "creditcard",
+                "credit_card",
+                "ssn"));
 
-     }
+        private static final Pattern CREDIT_CARD_PATTERN = Pattern.compile("\\d{4}[-\\s]?\\d{4}[-\\s]?\\d{4}[-\\s]?\\d{4}");
 
 
+        @Override
+        protected ToolResultBlock serialize(Object result, Type returnType) {
+            try {
+
+                ObjectMapper mapper = new ObjectMapper();
+                mapper.registerModule(new JavaTimeModule());
+                JsonNode node = mapper.valueToTree(result);
+                JsonNode masked = maskSensitiveData(node);
+                String json = JsonUtils.getJsonCodec().toJson(masked);
+
+                Map<String, Object> schema = JsonSchemaUtils.generateSchemaFromType(returnType);
+                String schemaJson = JsonUtils.getJsonCodec().toJson(schema);
+
+                return ToolResultBlock
+                        .of(List.of(
+                                TextBlock
+                                        .builder()
+                                        .text("⚠️  Sensitive data has been masked\n\n" + json)
+                                        .build(),
+                                TextBlock.builder()
+                                        .text("\nResult JSON Schema:\n" + schemaJson)
+                                        .build()
+                        ));
+
+
+            } catch (Exception e) {
+                return super.serialize(result, returnType);
+
+            }
+
+        }
+
+
+        private JsonNode maskSensitiveData(JsonNode node) {
+            if (node.isObject()) {
+                ObjectNode result = ((ObjectNode) node).deepCopy();
+                Iterator<Map.Entry<String, JsonNode>> fields = result.fields();
+                while (fields.hasNext()) {
+                    Map.Entry<String, JsonNode> entry = fields.next();
+                    String filedName = entry.getKey().toLowerCase();
+                    if (isSensitiveField(filedName)) {
+                        result.put(entry.getKey(), "***MASKED***");
+                    } else if (entry.getValue().isTextual()) {
+                        String value = entry.getValue().asText();
+                        if (CREDIT_CARD_PATTERN.matcher(value).matches()) {
+                            result.put(entry.getKey(), maskCreditCard(value));
+                        }
+                    }
+
+                }
+                return result;
+            }
+            return node;
+        }
+
+        private boolean isSensitiveField(String filedName) {
+            for (String sensitive : SENSITIVE_FIELDS) {
+                if (filedName.contains(sensitive)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private String maskCreditCard(String card) {
+            String digits = card.replaceAll("[^0-9]", "");
+            if (digits.length() >= 4) {
+                return "****-****-****-" + digits.substring(digits.length() - 4);
+            }
+            return "***MASKED***";
+        }
+
+
+    }
 
 
     public static class UserInfo {
