@@ -21,6 +21,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring.boot.version>4.0.1</spring.boot.version>
         <agentscope.version>1.0.10</agentscope.version>
+        <agentscope.version>1.0.10</agentscope.version>
+        <dashscope.version>2.15.0</dashscope.version>
 
     </properties>
     <dependencyManagement>
@@ -41,6 +43,13 @@
             <groupId>io.agentscope</groupId>
             <artifactId>agentscope-core</artifactId>
             <version>${agentscope.version}</version>
+        </dependency>
+
+        <!-- Alibaba DashScope SDK -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>dashscope-sdk-java</artifactId>
+            <version>${dashscope.version}</version>
         </dependency>
 
         <!-- RAG Extensions -->
