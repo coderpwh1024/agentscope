@@ -45,8 +45,37 @@ public class StructuredOutputExample {
         } catch (Exception e) {
             System.out.println("发生错误：" + e.getMessage());
             e.printStackTrace();
-
         }
+
+    }
+
+
+    private static void runContactExtractionExample(ReActAgent agent) {
+        String query = "请联系 John Smith，邮箱：john.smith@example.com，或致电：+1-555-123-4567。他所在的公司是 TechCorp Inc";
+
+        System.out.println("文本内容为: " + query);
+        System.out.println();
+
+        Msg userMsg = Msg.builder()
+                .role(MsgRole.USER)
+                .content(TextBlock.builder().text("从该查询中提取联系人信息:" + query).build())
+                .build();
+
+
+        try {
+            Msg msg = agent.call(userMsg, ContactInfo.class).block();
+            ContactInfo result = msg.getStructuredData(ContactInfo.class);
+
+            System.out.println("提取的结构化数据：");
+            System.out.println("  姓名：" + result.name);
+            System.out.println("  邮箱：" + result.email);
+            System.out.println("  电话：" + result.phone);
+            System.out.println("  公司：" + result.company);
+        } catch (Exception e) {
+            System.out.println("发生错误：" + e.getMessage());
+            e.printStackTrace();
+        }
+
 
     }
 
@@ -76,6 +105,8 @@ public class StructuredOutputExample {
         public String email;
 
         public String phone;
+
+        public String company;
 
         public ContactInfo() {
         }
