@@ -47,7 +47,7 @@ public class StructuredOutputExample {
 
         System.out.println("产品信息:");
         System.out.println();
-        runContactExtractionExample(agent);
+        runProductAnalysisExample(agent);
 
 
         System.out.println("联系人信息:");
