@@ -1,0 +1,99 @@
+package com.coderpwh.agentscope.example;
+
+import io.agentscope.core.ReActAgent;
+import io.agentscope.core.message.Msg;
+import io.agentscope.core.message.MsgRole;
+import io.agentscope.core.message.TextBlock;
+
+import java.io.IOException;
+import java.util.List;
+
+/**
+ * @author coderpwh
+ */
+public class StructuredOutputExample {
+
+
+    public static void main(String[] args) throws IOException {
+
+        ExampleUtils.printWelcome("结构化输出", "此示例演示如何从智能体生成结构化输出。该智能体将分析用户查询并返回结构化数据。");
+
+        String apiKey = ExampleUtils.getDashScopeApiKey();
+
+    }
+
+    private static void runProductAnalysisExample(ReActAgent agent) {
+        String query = "我在找一台笔记本电脑。我需要至少 16GB 内存，偏好苹果品牌，预算大约在 2000 美元左右。它应该轻便，方便出行携带";
+        System.out.println("query:" + query);
+
+        Msg userMsg = Msg.builder()
+                .role(MsgRole.USER)
+                .content(TextBlock.builder().text("从该查询中提取产品需求:" + query).build())
+                .build();
+
+        try {
+            Msg msg = agent.call(userMsg, ProductRequirements.class).block();
+
+            ProductRequirements result = msg.getStructuredData(ProductRequirements.class);
+
+            System.out.println("提取的结构化数据：");
+            System.out.println("  产品类型：" + result.productType);
+            System.out.println("  品牌：" + result.brand);
+            System.out.println("  最小内存：" + result.minRam + " GB");
+            System.out.println("  最高预算：$" + result.maxBudget);
+            System.out.println("  功能特性：" + result.features);
+        } catch (Exception e) {
+            System.out.println("发生错误：" + e.getMessage());
+            e.printStackTrace();
+
+        }
+
+    }
+
+
+    public static class ProductRequirements {
+
+        public String productType;
+
+        public String brand;
+
+        public Integer minRam;
+
+        public Double maxBudget;
+
+        public List<String> features;
+
+        public ProductRequirements() {
+        }
+
+
+    }
+
+
+    public static class ContactInfo {
+        public String name;
+
+        public String email;
+
+        public String phone;
+
+        public ContactInfo() {
+        }
+
+    }
+
+    public static class SentimentAnalysis {
+        public String overallSentiment;
+        public Double positiveScore;
+        public Double negativeScore;
+        public Double neutralScore;
+        public List<String> keyTopics;
+        public String summary;
+
+        public SentimentAnalysis() {
+        }
+
+    }
+
+
+}
