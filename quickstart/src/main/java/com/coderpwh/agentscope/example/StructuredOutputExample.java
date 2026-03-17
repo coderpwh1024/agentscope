@@ -45,8 +45,26 @@ public class StructuredOutputExample {
                 .memory(new InMemoryMemory())
                 .build();
 
+        System.out.println("产品信息:");
+        System.out.println();
+        runContactExtractionExample(agent);
 
 
+        System.out.println("联系人信息:");
+        System.out.println();
+        runContactExtractionExample(agent);
+
+        System.out.println("观点信息:");
+        System.out.println();
+        runSentimentAnalysisExample(agent);
+
+
+        System.out.println("产品信息:");
+        System.out.println();
+        runStreamProductAnalysisExample(agent);
+
+
+        System.out.println("完成结构化");
 
     }
 
