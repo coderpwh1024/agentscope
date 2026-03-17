@@ -3,9 +3,13 @@ package com.coderpwh.agentscope.example;
 import io.agentscope.core.ReActAgent;
 import io.agentscope.core.agent.Event;
 import io.agentscope.core.agent.StreamOptions;
+import io.agentscope.core.formatter.dashscope.DashScopeChatFormatter;
+import io.agentscope.core.memory.InMemoryMemory;
 import io.agentscope.core.message.Msg;
 import io.agentscope.core.message.MsgRole;
 import io.agentscope.core.message.TextBlock;
+import io.agentscope.core.model.DashScopeChatModel;
+import io.agentscope.core.tool.Toolkit;
 import reactor.core.publisher.Flux;
 
 import java.io.IOException;
@@ -22,6 +26,27 @@ public class StructuredOutputExample {
         ExampleUtils.printWelcome("结构化输出", "此示例演示如何从智能体生成结构化输出。该智能体将分析用户查询并返回结构化数据。");
 
         String apiKey = ExampleUtils.getDashScopeApiKey();
+
+
+        ReActAgent agent = ReActAgent
+                .builder()
+                .name("AnalysisAgent")
+                .sysPrompt("你是一个智能分析助手。分析用户请求并提供结构化的响应")
+                .model(
+                        DashScopeChatModel.builder()
+                                .apiKey(apiKey)
+                                .modelName("qwen-max")
+                                .stream(true)
+                                .enableThinking(false)
+                                .formatter(new DashScopeChatFormatter())
+                                .build()
+                )
+                .toolkit(new Toolkit())
+                .memory(new InMemoryMemory())
+                .build();
+
+
+
 
     }
 
