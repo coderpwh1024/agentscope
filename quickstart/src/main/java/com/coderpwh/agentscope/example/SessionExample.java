@@ -1,5 +1,14 @@
 package com.coderpwh.agentscope.example;
 
+import com.coderpwh.agentscope.util.MsgUtils;
+import io.agentscope.core.ReActAgent;
+import io.agentscope.core.memory.InMemoryMemory;
+import io.agentscope.core.message.Msg;
+import io.agentscope.core.message.MsgRole;
+import io.agentscope.core.message.TextBlock;
+import io.agentscope.core.session.Session;
+import io.agentscope.core.state.SimpleSessionKey;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -34,8 +43,52 @@ public class SessionExample {
         if (sessionId.isEmpty()) {
             sessionId = DEFAULT_SESSION_ID;
         }
-        System.out.println("Using session:"+sessionId);
+        System.out.println("Using session:" + sessionId);
         return sessionId;
+    }
+
+    private static void loadSession(ReActAgent agent, Session session, String sessionId, InMemoryMemory memory) {
+        if (session.exists(SimpleSessionKey.of(sessionId))) {
+            agent.loadFrom(session, sessionId);
+            int messageCount = memory.getMessages().size();
+            System.out.println("已加载:" + sessionId + messageCount + "条消息");
+            if (messageCount > 0) {
+                System.out.println("已加载:" + sessionId + messageCount + "条消息");
+            }
+        } else {
+            System.out.println("未找到会话:" + sessionId);
+        }
+    }
+
+    private static void runConversation(ReActAgent agent, Session session, String sessionId) throws IOException {
+        System.out.println("开始");
+        System.out.println("历史消息");
+        while (true) {
+            System.out.println("用户:");
+            String input = reader.readLine();
+
+            if (input == null || "exit".equalsIgnoreCase(input.trim())) {
+                break;
+            }
+
+            if (input.trim().isEmpty()) {
+                continue;
+            }
+
+            Msg userMsg = Msg.builder()
+                    .role(MsgRole.USER)
+                    .content(TextBlock.builder().text(input).build()).build();
+
+            Msg response = agent.call(userMsg).block();
+
+            if (response != null) {
+                System.out.println("智能体:" + MsgUtils.getTextContent(response) + "\n");
+            } else {
+                System.out.println("智能体:" + "无回复");
+            }
+
+        }
+
     }
 
 
