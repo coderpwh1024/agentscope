@@ -59,6 +59,7 @@ public class SessionExample {
                 .model(DashScopeChatModel
                         .builder()
                         .apiKey(apiKey)
+                        .modelName("qwen-max")
                         .stream(true)
                         .enableThinking(false)
                         .formatter(new DashScopeChatFormatter())
