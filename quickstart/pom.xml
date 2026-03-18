@@ -35,6 +35,13 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <!-- 强制排除 slf4j-simple -->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>2.0.17</version>
+                <scope>provided</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -43,6 +50,12 @@
             <groupId>io.agentscope</groupId>
             <artifactId>agentscope-core</artifactId>
             <version>${agentscope.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-simple</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Alibaba DashScope SDK -->
