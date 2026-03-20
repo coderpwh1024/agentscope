@@ -1,12 +1,18 @@
 package com.coderpwh.agentscope.example;
 
+import com.coderpwh.agentscope.util.MsgUtils;
 import io.agentscope.core.ReActAgent;
 import io.agentscope.core.formatter.dashscope.DashScopeChatFormatter;
 import io.agentscope.core.memory.InMemoryMemory;
+import io.agentscope.core.message.Msg;
+import io.agentscope.core.message.MsgRole;
+import io.agentscope.core.message.TextBlock;
 import io.agentscope.core.model.DashScopeChatModel;
+import io.agentscope.core.pipeline.SequentialPipeline;
 import io.agentscope.core.tool.Toolkit;
 
 import java.io.IOException;
+import java.time.Duration;
 
 /**
  * @author coderpwh
@@ -32,6 +38,64 @@ public class SequentialPipelineExample {
 
         System.out.println("开始执行");
 
+        ReActAgent translator = createTranslator(apikey);
+        ReActAgent summarizer = createSummarizer(apikey);
+        ReActAgent sentimentAnalyzer = createSentimentAnalyzer(apikey);
+
+
+        SequentialPipeline pipeline = SequentialPipeline
+                .builder()
+                .addAgent(translator)
+                .addAgent(summarizer)
+                .addAgent(sentimentAnalyzer)
+                .build();
+
+        System.out.println("通道 创建3个智能体:");
+        System.out.println("  [1] Translator → [2] Summarizer → [3] Sentiment Analyzer\n");
+
+        Msg inputMsg = Msg
+                .builder()
+                .role(MsgRole.USER)
+                .content(TextBlock.builder().text(SAMPLE_ARTICLE).build())
+                .build();
+
+        printSeparator();
+        System.out.println("ORIGINAL ARTICLE (English):");
+        printSeparator();
+        System.out.println(SAMPLE_ARTICLE);
+        System.out.println();
+        System.out.println("Executing pipeline...\n");
+
+        long startTime = System.currentTimeMillis();
+        Msg result = pipeline.execute(inputMsg).block(Duration.ofMinutes(3));
+        long executionTime = System.currentTimeMillis() - startTime;
+
+        printSeparator();
+        System.out.println("FINAL RESULT:");
+        printSeparator();
+
+        if (result != null) {
+            String resultText = MsgUtils.getTextContent(result);
+            System.out.println(resultText);
+        } else {
+            System.out.println("[No result returned]");
+        }
+        System.out.println();
+
+        printSeparator();
+        System.out.println("EXECUTION SUMMARY:");
+        printSeparator();
+
+        System.out.println("总执行时间：" + executionTime + "ms");
+        System.out.println("流水线阶段：3");
+        System.out.println("  步骤 1：翻译完成");
+        System.out.println("  步骤 2：摘要生成完成");
+        System.out.println("  步骤 3：情感分析完成");
+        System.out.println();
+
+        System.out.println(
+                "这展示了 SequentialPipeline 如何将多个 Agent 串联在一起，\n"
+                        + "每个 Agent 处理上一个 Agent 的输出结果。\n");
     }
 
 
@@ -59,12 +123,12 @@ public class SequentialPipelineExample {
     }
 
     private static ReActAgent createSummarizer(String apiKey) {
-        return  ReActAgent
+        return ReActAgent
                 .builder()
                 .name("Summarizer")
                 .sysPrompt("""
-                         你是一位专业的内容摘要生成器。用2-3句话对给定文本生成简洁的摘要。提炼主要观点和核心信息。摘要语言与输入文本保持一致。只输出摘要内容，不需要任何额外说明
-                         """)
+                        你是一位专业的内容摘要生成器。用2-3句话对给定文本生成简洁的摘要。提炼主要观点和核心信息。摘要语言与输入文本保持一致。只输出摘要内容，不需要任何额外说明
+                        """)
                 .model(DashScopeChatModel
                         .builder()
                         .apiKey(apiKey)
@@ -77,6 +141,36 @@ public class SequentialPipelineExample {
                 .memory(new InMemoryMemory())
                 .toolkit(new Toolkit())
                 .build();
+    }
+
+    private static ReActAgent createSentimentAnalyzer(String apikey) {
+        return ReActAgent
+                .builder()
+                .name("SentimentAnalyzer")
+                .sysPrompt("""
+                        你是一位情感分析专家。分析给定文本的情感倾向。将情感分类为：正面、负面、中性或混合。用1-2句话解释你的分类依据。请按以下格式输出结果：
+                        情感：[分类]
+                        理由：[解释]
+                        摘要：[重复输入文本]
+                        """)
+                .model(DashScopeChatModel
+                        .builder()
+                        .apiKey(apikey)
+                        .modelName("qwen-plus")
+                        .stream(true)
+                        .enableThinking(false)
+                        .formatter(new DashScopeChatFormatter())
+                        .build()
+                )
+                .memory(new InMemoryMemory())
+                .toolkit(new Toolkit())
+                .build();
+
+    }
+
+
+    private static void printSeparator() {
+        System.out.println("=".repeat(70));
     }
 
 
