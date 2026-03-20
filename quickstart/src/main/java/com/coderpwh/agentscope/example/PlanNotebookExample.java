@@ -57,12 +57,11 @@ public class PlanNotebookExample {
     public Mono<String> calculate(@ToolParam(name = "expression", description = "Math expression") String expression) {
         System.out.println("\n 计算表达式:" + expression);
         try {
-
+            double result = evaluateExpression(expression);
+            return Mono.just(expression + " = " + result);
         } catch (Exception e) {
-
+            return Mono.just("Error: Invalid expression");
         }
-
-        return null;
     }
 
     private static double evaluateExpression(String expr) {
