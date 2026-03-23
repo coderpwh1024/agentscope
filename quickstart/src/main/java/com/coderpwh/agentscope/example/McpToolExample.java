@@ -21,6 +21,7 @@ public class McpToolExample {
 
     private static void configureQueryParams(McpClientBuilder builder) throws IOException {
         System.out.println("添加查询参数?");
+
         if (!reader.readLine().trim().equalsIgnoreCase("y")) {
             return;
         }
