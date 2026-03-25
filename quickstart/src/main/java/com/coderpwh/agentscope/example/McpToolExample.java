@@ -20,7 +20,6 @@ public class McpToolExample {
     }
 
 
-
     private static McpClientWrapper configureSseMcp() throws Exception {
         System.out.println("\n --- SSE Configuration ---\n");
 
@@ -44,6 +43,29 @@ public class McpToolExample {
         configureQueryParams(builder);
 
         return buildAndConnect(builder);
+
+    }
+
+    private static McpClientWrapper configureMcp() throws Exception {
+        System.out.println("选择MCP 转化类型");
+
+        System.out.println(" 1) StdIO ");
+        System.out.println(" 2) SSE ");
+        System.out.println(" 3) HTTP ");
+
+        String choice = reader.readLine().trim();
+
+        switch (choice) {
+            case "1":
+                return configureStdioMcp();
+            case "2":
+                return configureSseMcp();
+            case "3":
+                return configureHttpMcp();
+            default:
+                System.out.println("初始化");
+                return configureStdioMcp();
+        }
 
     }
 
