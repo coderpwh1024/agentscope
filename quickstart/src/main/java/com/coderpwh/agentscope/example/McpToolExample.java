@@ -1,5 +1,6 @@
 package com.coderpwh.agentscope.example;
 
+import io.agentscope.core.tool.Toolkit;
 import io.agentscope.core.tool.mcp.McpClientBuilder;
 import io.agentscope.core.tool.mcp.McpClientWrapper;
 
@@ -15,10 +16,48 @@ public class McpToolExample {
 
     private static final BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+
+        ExampleUtils.printWelcome(
+                "MCP Tool Example",
+                "This example demonstrates MCP (Model Context Protocol) integration.\n"
+                        + "MCP allows agents to use external tool servers like filesystem, git,"
+                        + " databases, etc.");
+
+        String apiKey = ExampleUtils.getDashScopeApiKey();
+
+        McpClientWrapper mcpClient = configureMcp();
+
+        Toolkit toolkit = new Toolkit();
+        System.out.print("工具注册");
+        toolkit.registerMcpClient(mcpClient).block();
+        System.out.println("工具已注册");
+
 
     }
 
+    private static McpClientWrapper configureMcp() throws Exception {
+        System.out.println("选择MCP 转化类型");
+
+        System.out.println(" 1) StdIO ");
+        System.out.println(" 2) SSE ");
+        System.out.println(" 3) HTTP ");
+
+        String choice = reader.readLine().trim();
+
+        switch (choice) {
+            case "1":
+                return configureStdioMcp();
+            case "2":
+                return configureSseMcp();
+            case "3":
+                return configureHttpMcp();
+            default:
+                System.out.println("初始化");
+                return configureStdioMcp();
+        }
+
+    }
 
     private static McpClientWrapper configureSseMcp() throws Exception {
         System.out.println("\n --- SSE Configuration ---\n");
@@ -43,29 +82,6 @@ public class McpToolExample {
         configureQueryParams(builder);
 
         return buildAndConnect(builder);
-
-    }
-
-    private static McpClientWrapper configureMcp() throws Exception {
-        System.out.println("选择MCP 转化类型");
-
-        System.out.println(" 1) StdIO ");
-        System.out.println(" 2) SSE ");
-        System.out.println(" 3) HTTP ");
-
-        String choice = reader.readLine().trim();
-
-        switch (choice) {
-            case "1":
-                return configureStdioMcp();
-            case "2":
-                return configureSseMcp();
-            case "3":
-                return configureHttpMcp();
-            default:
-                System.out.println("初始化");
-                return configureStdioMcp();
-        }
 
     }
 
