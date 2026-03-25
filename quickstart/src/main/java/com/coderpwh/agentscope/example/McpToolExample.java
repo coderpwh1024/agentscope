@@ -19,6 +19,125 @@ public class McpToolExample {
 
     }
 
+
+
+    private static McpClientWrapper configureSseMcp() throws Exception {
+        System.out.println("\n --- SSE Configuration ---\n");
+
+        System.out.print("Server URL:");
+        String url = reader.readLine().trim();
+
+        if (url.isEmpty()) {
+            System.err.println("Error:URL required for SSE transport");
+            return configureStdioMcp();
+        }
+
+        McpClientBuilder builder = McpClientBuilder.create("mcp")
+                .sseTransport(url);
+
+        System.out.println("是否添加授权");
+        if (reader.readLine().trim().equalsIgnoreCase("y")) {
+            System.out.print("Token:");
+            String token = reader.readLine().trim();
+            builder.header("Authorization", "Bearer " + token);
+        }
+        configureQueryParams(builder);
+
+        return buildAndConnect(builder);
+
+    }
+
+
+    private static McpClientWrapper configureHttpMcp() throws Exception {
+        System.out.println("\n--- HTTP Configureation ---\n");
+        System.out.println("Server URL: ");
+
+        String url = reader.readLine().trim();
+        if (url.isEmpty()) {
+            System.err.println("Error:URL required for HTTP transport");
+            return configureStdioMcp();
+        }
+
+        McpClientBuilder builder = McpClientBuilder.create("mcp")
+                .streamableHttpTransport(url);
+
+        System.out.println("添加API  key header");
+        if (reader.readLine().trim().equalsIgnoreCase("y")) {
+            System.out.print("API Key: ");
+            String apiKey = reader.readLine().trim();
+            builder.header("x-api-key", apiKey);
+        }
+
+        configureQueryParams(builder);
+
+        return buildAndConnect(builder);
+    }
+
+    private static McpClientWrapper configureStdioMcp() throws IOException {
+        System.out.println("\n --- StdIO Configuration ---\n");
+
+        System.out.print("命令执行");
+
+        String command = reader.readLine().trim();
+        if (command.isEmpty()) {
+            command = "npx";
+        }
+
+        System.out.println("\n Common MCP servers:");
+        System.out.println("1) 文件系统 -访问文件");
+        System.out.println("2) 浏览器 -访问网页");
+        System.out.println("3) 聊天 -对话");
+        System.out.println("完成记录");
+
+        String serverChoice = reader.readLine().trim();
+        String[] mcpArgs;
+
+        switch (serverChoice) {
+            case "1":
+                System.out.print("Directory path");
+                String path = reader.readLine().trim();
+                if (path.isEmpty()) {
+                    path = "/tmp";
+                }
+
+                mcpArgs = new String[]{"-y", "@modelcontextprotocol/server-fileystem", path};
+                break;
+            case "2":
+                mcpArgs = new String[]{"-y", "@modelcontextprotocol/server-git"};
+                break;
+
+            default:
+                System.out.print("参数");
+                String argsStr = reader.readLine().trim();
+                if (argsStr.isEmpty()) {
+                    mcpArgs = new String[]{"-y", "@modelcontextprotocol/server-chat"};
+                } else {
+                    mcpArgs = argsStr.split(",");
+                }
+        }
+        System.out.println("连接MCP 服务");
+
+        try {
+            McpClientWrapper client = McpClientBuilder
+                    .create("mcp")
+                    .stdioTransport(command, mcpArgs)
+                    .buildAsync()
+                    .block();
+
+            System.out.println(" Connected!\n");
+            return client;
+        } catch (Exception e) {
+            System.err.println("链接失败");
+            System.err.println("Error: " + e.getMessage());
+            System.err.println("MCP 服务正在安装");
+            System.err.println(" 安装模型服务中");
+            throw e;
+        }
+
+
+    }
+
+
     private static void configureQueryParams(McpClientBuilder builder) throws IOException {
         System.out.println("添加查询参数?");
 
@@ -44,7 +163,7 @@ public class McpToolExample {
     }
 
 
-    private static McpClientWrapper buildAndContent(McpClientBuilder builder) throws Exception {
+    private static McpClientWrapper buildAndConnect(McpClientBuilder builder) throws Exception {
         System.out.println("连接MCP服务");
         try {
             McpClientWrapper client = builder.buildAsync().block();
