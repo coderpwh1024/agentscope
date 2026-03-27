@@ -34,6 +34,7 @@ public class McpToolExample {
         System.out.println("工具已注册");
 
 
+
     }
 
     private static McpClientWrapper configureMcp() throws Exception {
