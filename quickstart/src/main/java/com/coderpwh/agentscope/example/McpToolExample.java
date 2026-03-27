@@ -1,5 +1,9 @@
 package com.coderpwh.agentscope.example;
 
+import io.agentscope.core.ReActAgent;
+import io.agentscope.core.formatter.dashscope.DashScopeChatFormatter;
+import io.agentscope.core.memory.InMemoryMemory;
+import io.agentscope.core.model.DashScopeChatModel;
 import io.agentscope.core.tool.Toolkit;
 import io.agentscope.core.tool.mcp.McpClientBuilder;
 import io.agentscope.core.tool.mcp.McpClientWrapper;
@@ -34,7 +38,20 @@ public class McpToolExample {
         System.out.println("工具已注册");
 
 
-
+        ReActAgent agent =
+                ReActAgent.builder()
+                        .name("MCPAgent")
+                        .sysPrompt("你是一个有用的助手，可以使用MCP工具。使用可用的工具帮助用户完成他们的请求")
+                        .model(DashScopeChatModel
+                                .builder()
+                                .apiKey(apiKey)
+                                .stream(true)
+                                .enableThinking(false)
+                                .formatter(new DashScopeChatFormatter()).build()
+                        )
+                        .toolkit(toolkit)
+                        .memory(new InMemoryMemory())
+                        .build();
     }
 
     private static McpClientWrapper configureMcp() throws Exception {
