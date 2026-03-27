@@ -1,21 +1,64 @@
 package com.coderpwh.agentscope.example;
 
 import com.coderpwh.agentscope.util.MsgUtils;
+import io.agentscope.core.ReActAgent;
+import io.agentscope.core.formatter.dashscope.DashScopeChatFormatter;
 import io.agentscope.core.hook.*;
+import io.agentscope.core.memory.InMemoryMemory;
 import io.agentscope.core.message.Msg;
 import io.agentscope.core.message.ToolResultBlock;
+import io.agentscope.core.model.DashScopeChatModel;
 import io.agentscope.core.tool.Tool;
 import io.agentscope.core.tool.ToolEmitter;
 import io.agentscope.core.tool.ToolParam;
+import io.agentscope.core.tool.Toolkit;
 import reactor.core.publisher.Mono;
+
+import java.io.IOException;
+import java.util.List;
 
 /**
  * @author coderpwh
  */
 public class HookExample {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        ExampleUtils.printWelcome(
+                "Hook 示例",
+                "本示例演示用于监控 Agent 执行过程的 Hook 系统。\n"
+                        + "您将看到所有 Agent 活动的详细日志，包括推理过程"
+                        + "和工具调用。");
 
+        String apikey = ExampleUtils.getDashScopeApiKey();
+
+        Hook monitoringHook = new MonitoringHook();
+
+        Toolkit toolkit = new Toolkit();
+        toolkit.registerTool(new ProgressTools());
+
+        System.out.println("注册的工具");
+        System.out.println("- 执行数据");
+
+        ReActAgent agent = ReActAgent
+                .builder()
+                .name("HookAgent")
+                .sysPrompt("你是一个智能助手。在处理数据时，请使用process_data 工具")
+                .model(DashScopeChatModel
+                        .builder()
+                        .apiKey(apikey)
+                        .modelName("qwen-plus")
+                        .stream(true)
+                        .enableThinking(true)
+                        .formatter(new DashScopeChatFormatter())
+                        .build()
+                )
+                .toolkit(toolkit)
+                .memory(new InMemoryMemory())
+                .hooks(List.of(monitoringHook))
+                .build();
+
+        System.out.println("开始执行:");
+        ExampleUtils.startChat(agent);
     }
 
     static class MonitoringHook implements Hook {
