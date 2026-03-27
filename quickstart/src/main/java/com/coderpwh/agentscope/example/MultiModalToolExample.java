@@ -8,8 +8,6 @@ import io.agentscope.core.message.*;
 import io.agentscope.core.model.DashScopeChatModel;
 import io.agentscope.core.tool.multimodal.DashScopeMultiModalTool;
 import reactor.core.publisher.Mono;
-import java.awt.*;
-import java.io.IOException;
 import java.util.List;
 import io.agentscope.core.tool.Toolkit;
 /**
