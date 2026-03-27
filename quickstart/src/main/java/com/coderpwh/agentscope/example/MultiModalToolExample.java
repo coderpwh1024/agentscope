@@ -25,7 +25,6 @@ public class MultiModalToolExample {
                         + "该 Agent 具备图像、音频和视频多模态工具");
 
         String apikey = ExampleUtils.getDashScopeApiKey();
-
         Toolkit toolkit = new Toolkit();
         toolkit.registerTool(new DashScopeMultiModalTool(apikey));
         printRegisterTools();
@@ -48,6 +47,7 @@ public class MultiModalToolExample {
                 .toolkit(toolkit)
                 .memory(new InMemoryMemory())
                 .build();
+
 
         printExamplePrompts();
 
