@@ -52,6 +52,10 @@ public class McpToolExample {
                         .toolkit(toolkit)
                         .memory(new InMemoryMemory())
                         .build();
+
+        ExampleUtils.startChat(agent);
+
+
     }
 
     private static McpClientWrapper configureMcp() throws Exception {
