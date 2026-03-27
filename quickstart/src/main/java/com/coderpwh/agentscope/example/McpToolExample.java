@@ -23,10 +23,10 @@ public class McpToolExample {
     public static void main(String[] args) throws Exception {
 
         ExampleUtils.printWelcome(
-                "MCP Tool Example",
-                "This example demonstrates MCP (Model Context Protocol) integration.\n"
-                        + "MCP allows agents to use external tool servers like filesystem, git,"
-                        + " databases, etc.");
+                "MCP工具示例",
+                "此示例演示了MCP（模型上下文协议）的集成。\n"
+                        + "MCP允许代理使用外部工具服务器，例如文件系统、Git、"
+                        + " 数据库等。");
 
         String apiKey = ExampleUtils.getDashScopeApiKey();
 
