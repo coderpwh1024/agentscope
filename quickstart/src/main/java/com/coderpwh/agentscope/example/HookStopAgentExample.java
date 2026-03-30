@@ -33,8 +33,8 @@ public class HookStopAgentExample {
             System.out.println("工具 删除文件:"+filename);
             return "File '" + filename + "' has been deleted successfully.";
         }
-
     }
+
 
 
 }
