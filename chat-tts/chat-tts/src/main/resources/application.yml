@@ -1,0 +1,10 @@
+server:
+  port: 7001
+
+spring:
+  application:
+    name: chat-tts
+
+logging:
+  level:
+    io.agentscope: DEBUG
