@@ -1,9 +1,13 @@
 package com.coderpwh.chattts.controller;
 
 import io.agentscope.core.model.DashScopeChatModel;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
+
+import java.util.Map;
 
 /**
  * @author coderpwh
@@ -27,6 +31,13 @@ public class ChatController {
         this.apiKey = apiKey;
         this.chatModel = DashScopeChatModel.builder().apiKey(apiKey).modelName("qwen-plus").build();
     }
+
+
+    public Flux<ServerSentEvent<Map<String,Object>>> chat(){
+        return null;
+    }
+
+
 
 
 }
