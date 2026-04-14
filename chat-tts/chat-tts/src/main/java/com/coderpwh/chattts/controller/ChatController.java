@@ -1,7 +1,10 @@
 package com.coderpwh.chattts.controller;
 
+import io.agentscope.core.hook.TTSHook;
+import io.agentscope.core.message.Base64Source;
 import io.agentscope.core.model.DashScopeChatModel;
 import io.agentscope.core.model.tts.DashScopeRealtimeTTSModel;
+import io.swagger.v3.oas.annotations.servers.Server;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -55,6 +58,24 @@ public class ChatController {
                 .sampleRate(24000)
                 .format("pcm")
                 .build();
+
+
+         //  创建TTSHook
+        TTSHook  ttsHook = TTSHook.builder()
+                .ttsModel(requestTtsModel)
+                .audioCallback(audio->{
+                   if(audio.getSource() instanceof Base64Source src ){
+                       sink.tryEmitNext(
+                               ServerSentEvent.<Map<String,Object>>builder()
+                                       .event("audio")
+                                       .data(Map.of("audio",src.getData())).build()
+                       );
+                   }
+                }).build();
+
+
+
+
 
 
         return null;
