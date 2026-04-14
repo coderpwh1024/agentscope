@@ -1,11 +1,15 @@
 package com.coderpwh.chattts.controller;
 
 import io.agentscope.core.model.DashScopeChatModel;
+import io.agentscope.core.model.tts.DashScopeRealtimeTTSModel;
+import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Sinks;
 
 import java.util.Map;
 
@@ -33,11 +37,28 @@ public class ChatController {
     }
 
 
-    public Flux<ServerSentEvent<Map<String,Object>>> chat(){
+    @RequestMapping(value = "/chat", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ServerSentEvent<Map<String, Object>>> chat(@RequestBody Map<String, String> request) {
+        String messages = request.get("message");
+
+        if (messages == null || messages.isEmpty()) {
+            return Flux.just(ServerSentEvent.<Map<String, Object>>builder().event("error").data(Map.of("error", "Message is required")).build());
+        }
+
+
+        Sinks.Many<ServerSentEvent<Map<String, Object>>> sink = Sinks.many().multicast().onBackpressureBuffer();
+
+        DashScopeRealtimeTTSModel requestTtsModel = DashScopeRealtimeTTSModel.builder()
+                .apiKey(apiKey)
+                .modelName("qwen3-tts-flash-realtime")
+                .voice("Cherry")
+                .sampleRate(24000)
+                .format("pcm")
+                .build();
+
+
         return null;
     }
-
-
 
 
 }
