@@ -4,6 +4,7 @@ import io.agentscope.core.tool.Tool;
 import io.agentscope.core.tool.ToolSuspendException;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author coderpwh
@@ -27,7 +28,7 @@ public class UserInteractionTool {
                     + " 'confirm' for yes/no questions, 'form' for collecting multiple fields"
                     + " at once (provide fields), 'date' for date selection, 'number' for"
                     + " numeric input.")
-    public String askUser(String question, String uiType, List<String> options) {
+    public String askUser(String question, String uiType, List<String> options, List<Map<String,Object>> fiedls,Object defaultValue,Boolean allowOther) {
 
         String reason = question != null ? question : "Waiting for user input";
 
