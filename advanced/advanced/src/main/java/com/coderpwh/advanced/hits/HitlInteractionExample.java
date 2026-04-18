@@ -3,15 +3,22 @@ package com.coderpwh.advanced.hits;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.agentscope.core.ReActAgent;
 import io.agentscope.core.formatter.dashscope.DashScopeChatFormatter;
+import io.agentscope.core.message.Msg;
 import io.agentscope.core.model.DashScopeChatModel;
 import io.agentscope.core.session.InMemorySession;
 import io.agentscope.core.session.Session;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.http.MediaType;
+import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import io.agentscope.core.tool.Toolkit;
+import reactor.core.publisher.Flux;
+
 import java.awt.*;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -91,6 +98,24 @@ public class HitlInteractionExample {
     }
 
 
+    @RequestMapping(value = "/chat", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ServerSentEvent<Map<String, Object>>> chat(@RequestBody Map<String, String> request) {
+
+        String sessionId = (String) request.get("sessionId");
+
+        String message = request.get("message");
+
+        if(message==null||message.isEmpty()){
+            return  Flux.just(ServerSentEvent.<Map<String,Object>builder().data());
+        }
+
+    }
+
+
+
+   private static  Map<String,Object> errorEvent(String error){
+       return Map.of("type", "ERROR", "error", error != null ? error : "Unknown error");
+   }
 
 
 }
