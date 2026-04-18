@@ -6,6 +6,7 @@ import io.agentscope.core.formatter.dashscope.DashScopeChatFormatter;
 import io.agentscope.core.model.DashScopeChatModel;
 import io.agentscope.core.session.InMemorySession;
 import io.agentscope.core.session.Session;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -69,6 +70,24 @@ public class HitlInteractionExample {
                         .enableThinking(false)
                         .formatter(new DashScopeChatFormatter())
                         .build();
+    }
+
+    public static void main(String[] args) {
+        String apiKey = System.getenv("DASHSCOPE_API_KEY");
+        if (apiKey == null || apiKey.isEmpty()) {
+            System.err.println("Error: DASHSCOPE_API_KEY environment variable not set.");
+            System.err.println("Please set it with: export DASHSCOPE_API_KEY=your_api_key");
+            System.exit(1);
+        }
+
+        System.out.println("\n" + "=".repeat(70));
+        System.out.println("  HITL Interactive UI Example");
+        System.out.println("  Agent with dynamic UI-based user interaction");
+        System.out.println("=".repeat(70));
+        System.out.println("  Open: http://localhost:8080/hitl-interaction/index.html");
+        System.out.println("=".repeat(70) + "\n");
+
+        SpringApplication.run(HitlInteractionExample.class, args);
     }
 
 
