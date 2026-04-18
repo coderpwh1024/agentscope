@@ -3,6 +3,7 @@ package com.coderpwh.advanced.hits;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.agentscope.core.ReActAgent;
 import io.agentscope.core.formatter.dashscope.DashScopeChatFormatter;
+import io.agentscope.core.memory.InMemoryMemory;
 import io.agentscope.core.message.Msg;
 import io.agentscope.core.model.DashScopeChatModel;
 import io.agentscope.core.session.InMemorySession;
@@ -105,17 +106,36 @@ public class HitlInteractionExample {
 
         String message = request.get("message");
 
-        if(message==null||message.isEmpty()){
-            return  Flux.just(ServerSentEvent.<Map<String,Object>builder().data());
+        if (message == null || message.isEmpty()) {
+            return Flux.just(ServerSentEvent.<Map<String, Object>>builder().data(errorEvent("Missing required parameter:message")).build());
         }
 
+//        ReActAgent agent =
+
+
+        return null;
     }
 
 
+    private ReActAgent createAgent(String sessionId) {
+        ReActAgent agent = ReActAgent.builder()
+                .name("FitnessCoach")
+                .sysPrompt(SYS_PROMPT)
+                .model(model)
+                .toolkit(toolkit)
+                .memory(new InMemoryMemory())
+                .hook(new ToolConfirmationHook(TOOLS_REQUIRING_CONFIRMATION))
+                .hook(new ObservationHook())
+                .build();
 
-   private static  Map<String,Object> errorEvent(String error){
-       return Map.of("type", "ERROR", "error", error != null ? error : "Unknown error");
-   }
+        agent.loadIfExists(session, sessionId);
+        return agent;
+    }
+
+
+    private static Map<String, Object> errorEvent(String error) {
+        return Map.of("type", "ERROR", "error", error != null ? error : "Unknown error");
+    }
 
 
 }
