@@ -1,27 +1,43 @@
 package com.coderpwh.advanced.hits;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.agentscope.core.ReActAgent;
+import io.agentscope.core.agent.Event;
+import io.agentscope.core.agent.StreamOptions;
 import io.agentscope.core.formatter.dashscope.DashScopeChatFormatter;
 import io.agentscope.core.memory.InMemoryMemory;
+import io.agentscope.core.message.GenerateReason;
 import io.agentscope.core.message.Msg;
+import io.agentscope.core.message.MsgRole;
+import io.agentscope.core.message.TextBlock;
+import io.agentscope.core.message.ToolResultBlock;
+import io.agentscope.core.message.ToolUseBlock;
 import io.agentscope.core.model.DashScopeChatModel;
 import io.agentscope.core.session.InMemorySession;
 import io.agentscope.core.session.Session;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.http.MediaType;
-import org.springframework.http.codec.ServerSentEvent;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import io.agentscope.core.state.SimpleSessionKey;
 import io.agentscope.core.tool.Toolkit;
-import reactor.core.publisher.Flux;
-
-import java.awt.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
+
 
 /**
  * @author coderpwh
@@ -133,9 +149,186 @@ public class HitlInteractionExample {
     }
 
 
+    /***
+     *
+     * @param sessionId
+     * @param agent
+     * @param events
+     * @return
+     */
+
+    private Flux<ServerSentEvent<Map<String, Object>>> wrapAsSSE(String sessionId, ReActAgent agent, Flux<Map<String, Object>> events) {
+        return events.concatWith(
+                        Flux.just(completeEvent()))
+                .onErrorResume(error -> Flux.just(errorEvent(error.getMessage()), completeEvent()))
+                .doFinally(
+                        signal -> {
+                            runningAgents.remove(sessionId);
+                            agent.saveTo(session, sessionId);
+                        }).map(data -> ServerSentEvent.<Map<String, Object>>builder().data(data).build());
+    }
+
+    private Flux<Map<String, Object>> convertEvent(Event event) {
+        List<Map<String, Object>> events = new ArrayList<>();
+        Msg msg = event.getMessage();
+
+        switch (event.getType()) {
+            case REASONING -> {
+                if (event.isLast() && msg.hasContentBlocks(ToolUseBlock.class)) {
+                    List<ToolUseBlock> toolCalls = msg.getContentBlocks(ToolUseBlock.class);
+                    boolean needsConfirm =
+                            toolCalls.stream()
+                                    .anyMatch(
+                                            t ->
+                                                    TOOLS_REQUIRING_CONFIRMATION.contains(
+                                                            t.getName()));
+
+                    if (needsConfirm) {
+                        // Tools require user approval — emit TOOL_CONFIRM
+                        events.add(toolConfirmEvent(toolCalls));
+                    } else {
+                        // Normal tool calls — show non-ask_user tools
+                        for (ToolUseBlock tool : toolCalls) {
+                            if (!UserInteractionTool.TOOL_NAME.equals(tool.getName())) {
+                                events.add(toolUseEvent(tool));
+                            }
+                        }
+                    }
+                } else {
+                    // Streaming text chunks
+                    String text = extractText(msg);
+                    if (text != null && !text.isEmpty()) {
+                        events.add(textEvent(text, !event.isLast()));
+                    }
+                }
+            }
+            case TOOL_RESULT -> {
+                for (ToolResultBlock result : msg.getContentBlocks(ToolResultBlock.class)) {
+                    if (!UserInteractionTool.TOOL_NAME.equals(result.getName())) {
+                        events.add(toolResultEvent(result));
+                    }
+                }
+            }
+            case AGENT_RESULT -> {
+                GenerateReason reason = msg.getGenerateReason();
+                if (reason == GenerateReason.TOOL_SUSPENDED) {
+                    List<ToolUseBlock> toolCalls = msg.getContentBlocks(ToolUseBlock.class);
+                    for (ToolUseBlock tool : toolCalls) {
+                        if (UserInteractionTool.TOOL_NAME.equals(tool.getName())) {
+                            events.add(userInteractionEvent(tool));
+                        }
+                    }
+                }
+            }
+            default -> {
+                // HINT, SUMMARY, etc. - ignore for simplicity
+            }
+        }
+
+        return Flux.fromIterable(events);
+    }
+
+
+    private Map<String, Object> textEvent(String content, boolean incremental) {
+        return Map.of("type", "TEXT", "content", content, "incremental", incremental);
+    }
+
+    private Map<String, Object> toolUseEvent(ToolUseBlock tool) {
+        return Map.of(
+                "type", "TOOL_USE",
+                "toolId", tool.getId(),
+                "toolName", tool.getName(),
+                "toolInput", convertInput(tool.getInput()));
+    }
+
+    private Map<String, Object> toolResultEvent(ToolResultBlock result) {
+        return Map.of(
+                "type", "TOOL_RESULT",
+                "toolId", result.getId(),
+                "toolName", result.getName(),
+                "toolResult", ObservationHook.extractToolOutputText(result, ""));
+    }
+
+    /**
+     * Build a TOOL_CONFIRM event containing all pending tool calls that need user approval.
+     */
+    private Map<String, Object> toolConfirmEvent(List<ToolUseBlock> toolCalls) {
+        List<Map<String, Object>> pending =
+                toolCalls.stream()
+                        .map(
+                                tool ->
+                                        Map.<String, Object>of(
+                                                "id", tool.getId(),
+                                                "name", tool.getName(),
+                                                "input", convertInput(tool.getInput()),
+                                                "needsConfirm",
+                                                TOOLS_REQUIRING_CONFIRMATION.contains(
+                                                        tool.getName())))
+                        .toList();
+        return Map.of("type", "TOOL_CONFIRM", "pendingToolCalls", pending);
+    }
+
+    /**
+     * Build a USER_INTERACTION event from the ask_user tool's ToolUseBlock.
+     *
+     * <p>The tool's input parameters contain the UI specification:
+     * question, ui_type, options, fields, default_value.
+     */
+    private Map<String, Object> userInteractionEvent(ToolUseBlock tool) {
+        Map<String, Object> input = tool.getInput();
+        Map<String, Object> event = new LinkedHashMap<>();
+        event.put("type", "USER_INTERACTION");
+        event.put("toolId", tool.getId());
+        event.put("question", input.getOrDefault("question", "Please provide more information"));
+        event.put("uiType", input.getOrDefault("ui_type", "text"));
+
+        if (input.containsKey("options")) {
+            event.put("options", input.get("options"));
+        }
+        if (input.containsKey("fields")) {
+            event.put("fields", input.get("fields"));
+        }
+        if (input.containsKey("default_value")) {
+            event.put("defaultValue", input.get("default_value"));
+        }
+        if (Boolean.TRUE.equals(input.get("allow_other"))) {
+            event.put("allowOther", true);
+        }
+
+        return event;
+    }
+
+    private static Map<String, Object> completeEvent() {
+        return Map.of("type", "COMPLETE");
+    }
+
     private static Map<String, Object> errorEvent(String error) {
         return Map.of("type", "ERROR", "error", error != null ? error : "Unknown error");
     }
 
+    // ==================== Helpers ====================
+
+    private String extractText(Msg msg) {
+        List<TextBlock> textBlocks = msg.getContentBlocks(TextBlock.class);
+        if (textBlocks.isEmpty()) {
+            return null;
+        }
+        return textBlocks.stream().map(TextBlock::getText).collect(Collectors.joining());
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> convertInput(Object input) {
+        if (input == null) {
+            return Map.of();
+        }
+        if (input instanceof Map) {
+            return (Map<String, Object>) input;
+        }
+        try {
+            return OBJECT_MAPPER.convertValue(input, new TypeReference<Map<String, Object>>() {});
+        } catch (Exception e) {
+            return Map.of("value", input.toString());
+        }
+    }
 
 }
