@@ -200,6 +200,44 @@ public class HitlInteractionExample {
         return ResponseEntity.ok(Map.of("success", true, "interrupted", false));
     }
 
+    @SuppressWarnings("unchecked")
+    @PostMapping(value = "/chat/confirm", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ServerSentEvent<Map<String, Object>>> confirmTool(
+            @RequestBody Map<String, Object> request) {
+        String sessionId = (String) request.getOrDefault("sessionId", "default");
+        boolean confirmed = Boolean.TRUE.equals(request.get("confirmed"));
+        List<Map<String, String>> toolCalls = (List<Map<String, String>>) request.get("toolCalls");
+
+        ReActAgent agent = createAgent(sessionId);
+        runningAgents.put(sessionId, agent);
+
+        Flux<Map<String, Object>> eventFlux;
+        if (confirmed) {
+            eventFlux = agent.stream(StreamOptions.defaults()).flatMap(this::convertEvent);
+        } else {
+            String reason = (String) request.getOrDefault("reason", "Cancelled by user");
+            List<ToolResultBlock> results = new ArrayList<>();
+            if (toolCalls != null) {
+                for (Map<String, String> tc : toolCalls) {
+                    results.add(
+                            ToolResultBlock.of(
+                                    tc.get("id"),
+                                    tc.get("name"),
+                                    TextBlock.builder().text(reason).build()));
+                }
+            }
+            Msg cancelMsg =
+                    Msg.builder()
+                            .role(MsgRole.TOOL)
+                            .content(results.toArray(new ToolResultBlock[0]))
+                            .build();
+            eventFlux = agent.stream(cancelMsg).flatMap(this::convertEvent);
+        }
+
+        return wrapAsSSE(sessionId, agent, eventFlux);
+    }
+
+
 
 
     private ReActAgent createAgent(String sessionId) {
