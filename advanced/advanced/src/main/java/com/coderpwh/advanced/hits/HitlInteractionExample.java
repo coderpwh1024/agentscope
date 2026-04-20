@@ -141,6 +141,66 @@ public class HitlInteractionExample {
         return wrapAsSSE(sessionId, agent, events);
     }
 
+    @PostMapping(value = "/chat/respond", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ServerSentEvent<Map<String, Object>>> respond(
+            @RequestBody Map<String, Object> request) {
+        String sessionId = (String) request.getOrDefault("sessionId", "default");
+        String toolId = (String) request.get("toolId");
+        if (toolId == null || toolId.isBlank()) {
+            return Flux.just(
+                    ServerSentEvent.<Map<String, Object>>builder()
+                            .data(errorEvent("Missing required parameter: toolId"))
+                            .build());
+        }
+        Object response = request.get("response");
+
+        ReActAgent agent = createAgent(sessionId);
+        runningAgents.put(sessionId, agent);
+
+        String responseText;
+        if (response instanceof String s) {
+            responseText = s;
+        } else {
+            try {
+                responseText = OBJECT_MAPPER.writeValueAsString(response);
+            } catch (Exception e) {
+                responseText = String.valueOf(response);
+            }
+        }
+
+        // Create ToolResultBlock with user's response
+        ToolResultBlock result =
+                ToolResultBlock.of(
+                        toolId,
+                        UserInteractionTool.TOOL_NAME,
+                        TextBlock.builder().text("User responded: " + responseText).build());
+
+        Msg responseMsg = Msg.builder().role(MsgRole.TOOL).content(result).build();
+
+        Flux<Map<String, Object>> events = agent.stream(responseMsg).flatMap(this::convertEvent);
+        return wrapAsSSE(sessionId, agent, events);
+    }
+
+    @DeleteMapping("/chat/session/{sessionId}")
+    public ResponseEntity<Map<String, Object>> clearSession(@PathVariable String sessionId) {
+        session.delete(SimpleSessionKey.of(sessionId));
+        return ResponseEntity.ok(Map.of("success", true));
+    }
+
+    /**
+     * Interrupt a running agent.
+     */
+    @PostMapping("/chat/interrupt/{sessionId}")
+    public ResponseEntity<Map<String, Object>> interrupt(@PathVariable String sessionId) {
+        ReActAgent agent = runningAgents.get(sessionId);
+        if (agent != null) {
+            agent.interrupt();
+            return ResponseEntity.ok(Map.of("success", true, "interrupted", true));
+        }
+        return ResponseEntity.ok(Map.of("success", true, "interrupted", false));
+    }
+
+
 
     private ReActAgent createAgent(String sessionId) {
         ReActAgent agent = ReActAgent.builder()
