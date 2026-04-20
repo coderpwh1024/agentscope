@@ -18,6 +18,7 @@ import io.agentscope.core.session.InMemorySession;
 import io.agentscope.core.session.Session;
 import io.agentscope.core.state.SimpleSessionKey;
 import io.agentscope.core.tool.Toolkit;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -25,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.MediaType;
@@ -126,10 +128,17 @@ public class HitlInteractionExample {
             return Flux.just(ServerSentEvent.<Map<String, Object>>builder().data(errorEvent("Missing required parameter:message")).build());
         }
 
-//        ReActAgent agent =
+        ReActAgent agent = createAgent(sessionId);
+        runningAgents.put(sessionId, agent);
 
+        Msg userMsg = Msg.builder()
+                .name("User")
+                .role(MsgRole.USER)
+                .content(TextBlock.builder().text(message).build())
+                .build();
 
-        return null;
+        Flux<Map<String, Object>> events = agent.stream(userMsg).flatMap(this::convertEvent);
+        return wrapAsSSE(sessionId, agent, events);
     }
 
 
@@ -325,7 +334,8 @@ public class HitlInteractionExample {
             return (Map<String, Object>) input;
         }
         try {
-            return OBJECT_MAPPER.convertValue(input, new TypeReference<Map<String, Object>>() {});
+            return OBJECT_MAPPER.convertValue(input, new TypeReference<Map<String, Object>>() {
+            });
         } catch (Exception e) {
             return Map.of("value", input.toString());
         }
