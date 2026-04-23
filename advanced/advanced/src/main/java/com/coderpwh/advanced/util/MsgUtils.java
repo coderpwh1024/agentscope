@@ -1,6 +1,5 @@
 package com.coderpwh.advanced.util;
 
-import com.google.gson.internal.bind.SerializationDelegatingTypeAdapter;
 import io.agentscope.core.message.ContentBlock;
 import io.agentscope.core.message.Msg;
 import io.agentscope.core.message.TextBlock;

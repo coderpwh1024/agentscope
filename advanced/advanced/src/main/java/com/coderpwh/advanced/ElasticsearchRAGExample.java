@@ -16,5 +16,14 @@ public class ElasticsearchRAGExample {
     private static final String ES_INDEX_NAME = "agentscope_rag_example";
 
 
+    public static void main(String[] args) {
+        ExampleUtils.printWelcome(
+                "Elasticsearch RAG Example",
+                "This example demonstrates RAG capabilities using Elasticsearch:\n"
+                        + "  - Connecting to Elasticsearch vector store\n"
+                        + "  - Indexing documents with dense vectors\n"
+                        + "  - Agentic knowledge retrieval backed by ES");
+    }
+
 
 }
