@@ -1,7 +1,11 @@
 package com.coderpwh.advanced;
 
+import io.agentscope.core.model.DashScopeChatModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import io.agentscope.core.embedding.EmbeddingModel;
+import io.agentscope.core.embedding.dashscope.DashScopeTextEmbedding;
+import io.agentscope.core.formatter.dashscope.DashScopeChatFormatter;
 
 public class ElasticsearchRAGExample {
     private static final Logger log = LoggerFactory.getLogger(ElasticsearchRAGExample.class);
@@ -18,11 +22,19 @@ public class ElasticsearchRAGExample {
 
     public static void main(String[] args) {
         ExampleUtils.printWelcome(
-                "Elasticsearch RAG Example",
-                "This example demonstrates RAG capabilities using Elasticsearch:\n"
-                        + "  - Connecting to Elasticsearch vector store\n"
-                        + "  - Indexing documents with dense vectors\n"
-                        + "  - Agentic knowledge retrieval backed by ES");
+                "Elasticsearch RAG 示例",
+                "本示例演示基于 Elasticsearch 的 RAG 能力：\n"
+                        + "  - 连接到 Elasticsearch 向量存储\n"
+                        + "  - 使用稠密向量索引文档\n"
+                        + "  - 由 ES 支持的智能知识检索");
+
+
+        String apikey = ExampleUtils.getDashScopeApiKey();
+
+        System.out.println("开始创建 Embeding 模型了");
+
+
+
     }
 
 

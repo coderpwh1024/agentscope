@@ -15,12 +15,22 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring.boot.version>4.0.1</spring.boot.version>
         <agentscope.version>1.0.10</agentscope.version>
-        <agentscope.version>1.0.10</agentscope.version>
         <dashscope.version>2.15.0</dashscope.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <!--
+             Declare the Elasticsearch Java client version explicitly and
+             place it before the Spring Boot BOM so that this version (8.12.0)
+             overrides the one managed by Spring Boot.
+             -->
+            <dependency>
+                <groupId>co.elastic.clients</groupId>
+                <artifactId>elasticsearch-java</artifactId>
+                <version>9.3.3</version>
+            </dependency>
+
             <!-- Spring Boot BOM -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
@@ -29,104 +39,59 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <!-- 强制排除 slf4j-simple -->
-            <!--        <dependency>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-simple</artifactId>
-                        <version>2.0.17</version>
-                        <scope>provided</scope>
-                    </dependency>-->
         </dependencies>
     </dependencyManagement>
 
     <dependencies>
+        <!-- AgentScope Core -->
         <dependency>
             <groupId>io.agentscope</groupId>
             <artifactId>agentscope-core</artifactId>
             <version>${agentscope.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-simple</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
-        <!-- Alibaba DashScope SDK -->
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>dashscope-sdk-java</artifactId>
-            <version>${dashscope.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-simple</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <!-- RAG Extensions -->
+        <!-- AgentScope Extensions -->
         <dependency>
             <groupId>io.agentscope</groupId>
-            <artifactId>agentscope-extensions-rag-dify</artifactId>
+            <artifactId>agentscope-extensions-rag-bailian</artifactId>
             <version>${agentscope.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-simple</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>io.agentscope</groupId>
-            <artifactId>agentscope-extensions-rag-ragflow</artifactId>
+            <artifactId>agentscope-extensions-rag-simple</artifactId>
             <version>${agentscope.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-simple</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <!-- Higress AI Gateway Extension -->
-        <dependency>
-            <groupId>io.agentscope</groupId>
-            <artifactId>agentscope-extensions-higress</artifactId>
-            <version>${agentscope.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-simple</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>io.agentscope</groupId>
-            <artifactId>agentscope-extensions-rag-haystack</artifactId>
+            <artifactId>agentscope-extensions-mem0</artifactId>
             <version>${agentscope.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-simple</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
+        <dependency>
+            <groupId>io.agentscope</groupId>
+            <artifactId>agentscope-extensions-reme</artifactId>
+            <version>${agentscope.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.agentscope</groupId>
+            <artifactId>agentscope-extensions-studio</artifactId>
+            <version>${agentscope.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.agentscope</groupId>
+            <artifactId>agentscope-extensions-autocontext-memory</artifactId>
+            <version>${agentscope.version}</version>
+        </dependency>
+
+        <!-- Spring Boot for web examples -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.30</version>
-            <scope>provided</scope>
-        </dependency>
-
     </dependencies>
 
 </project>
