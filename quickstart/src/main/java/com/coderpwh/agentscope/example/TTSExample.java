@@ -17,7 +17,7 @@ public class TTSExample {
 
     public static void main(String[] args) {
 
-        String apiKey = "";
+        String apiKey = " ";
         if (apiKey == null || apiKey.isEmpty()) {
             System.err.println("设置秘钥");
             return;
@@ -28,13 +28,13 @@ public class TTSExample {
         System.out.println();
 
 
-//        realtimeAgentWithTTS(apiKey);
+        realtimeAgentWithTTS(apiKey);
 
 //        standaloneTTSModel(apiKey);
 
 //        standaloneRealtimeTTSDemo(apiKey);
 
-        agentWithTTSTool(apiKey);
+//        agentWithTTSTool(apiKey);
 
     }
 
