@@ -3,12 +3,18 @@ package com.coderpwh.advanced;
 import io.agentscope.core.model.DashScopeChatModel;
 import io.agentscope.core.rag.Knowledge;
 import io.agentscope.core.rag.knowledge.SimpleKnowledge;
+import io.agentscope.core.rag.model.Document;
+import io.agentscope.core.rag.reader.ReaderInput;
+import io.agentscope.core.rag.reader.SplitStrategy;
+import io.agentscope.core.rag.reader.TextReader;
 import io.agentscope.core.rag.store.ElasticsearchStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.agentscope.core.embedding.EmbeddingModel;
 import io.agentscope.core.embedding.dashscope.DashScopeTextEmbedding;
 import io.agentscope.core.formatter.dashscope.DashScopeChatFormatter;
+
+import java.util.List;
 
 public class ElasticsearchRAGExample {
     private static final Logger log = LoggerFactory.getLogger(ElasticsearchRAGExample.class);
@@ -68,13 +74,57 @@ public class ElasticsearchRAGExample {
             System.out.println("开始创建es文档了");
 
 
-
-
         } catch (Exception e) {
 
         }
 
 
+    }
+
+
+    /***
+     * 添加文档
+     * @param knowledge
+     */
+    private static void addSampleDocuments(Knowledge knowledge) {
+        // Sample documents about AgentScope and Elasticsearch
+        String[] documents = {
+                "AgentScope is a multi-agent system framework developed by ModelScope. It provides a"
+                        + " unified interface for building and managing multi-agent applications.",
+                "Elasticsearch is a distributed, RESTful search and analytics engine capable of "
+                        + "performing vector similarity search using kNN (k-nearest neighbors).",
+                "This specific example demonstrates how to replace the InMemoryStore with an "
+                        + "ElasticsearchStore in AgentScope to persist knowledge data.",
+                "RAG (Retrieval-Augmented Generation) combines LLMs with external knowledge retrieval "
+                        + "to reduce hallucinations and provide up-to-date information.",
+                "AgentScope allows developers to easily switch between different vector store"
+                        + " implementations via the VDBStoreBase interface."
+        };
+
+        // Create reader for text documents
+        TextReader reader = new TextReader(512, SplitStrategy.PARAGRAPH, 50);
+
+        // Add each document
+        for (int i = 0; i < documents.length; i++) {
+            String docText = documents[i];
+            ReaderInput input = ReaderInput.fromString(docText);
+
+            try {
+                List<Document> docs = reader.read(input).block();
+                if (docs != null && !docs.isEmpty()) {
+                    // This will embed the document and push it to Elasticsearch
+                    knowledge.addDocuments(docs).block();
+                    System.out.println(
+                            "  Indexed document "
+                                    + (i + 1)
+                                    + ": "
+                                    + docText.substring(0, Math.min(50, docText.length()))
+                                    + "...");
+                }
+            } catch (Exception e) {
+                System.err.println("  Error adding document " + (i + 1) + ": " + e.getMessage());
+            }
+        }
     }
 
 
