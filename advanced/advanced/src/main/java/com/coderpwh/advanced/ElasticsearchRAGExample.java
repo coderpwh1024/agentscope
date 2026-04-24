@@ -1,6 +1,9 @@
 package com.coderpwh.advanced;
 
 import io.agentscope.core.model.DashScopeChatModel;
+import io.agentscope.core.rag.Knowledge;
+import io.agentscope.core.rag.knowledge.SimpleKnowledge;
+import io.agentscope.core.rag.store.ElasticsearchStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.agentscope.core.embedding.EmbeddingModel;
@@ -42,7 +45,34 @@ public class ElasticsearchRAGExample {
 
         System.out.println("创建完成");
 
+        System.out.println("进行 es 数据库的连接");
 
+        try {
+            ElasticsearchStore elasticsearchStore = ElasticsearchStore.builder()
+                    .url(ES_URL)
+                    .username(ES_USERNAME)
+                    .password(ES_PASSWORD)
+                    .indexName(ES_INDEX_NAME)
+                    .dimensions(EMBEDDING_DIMENSIONS)
+                    .build();
+
+            System.out.println("es 连接进行初始化等");
+
+            Knowledge knowledge = SimpleKnowledge.builder()
+                    .embeddingModel(embeddingModel)
+                    .embeddingStore(elasticsearchStore)
+                    .build();
+
+            System.out.println("Knowledge 创建完成");
+
+            System.out.println("开始创建es文档了");
+
+
+
+
+        } catch (Exception e) {
+
+        }
 
 
     }
