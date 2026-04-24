@@ -34,6 +34,16 @@ public class ElasticsearchRAGExample {
         System.out.println("开始创建 Embeding 模型了");
 
 
+        EmbeddingModel embeddingModel = DashScopeTextEmbedding.builder()
+                .apiKey(apikey)
+                .modelName("text-embedding-v3")
+                .dimensions(EMBEDDING_DIMENSIONS)
+                .build();
+
+        System.out.println("创建完成");
+
+
+
 
     }
 
