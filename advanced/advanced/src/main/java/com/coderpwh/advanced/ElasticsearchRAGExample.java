@@ -29,7 +29,9 @@ public class ElasticsearchRAGExample {
     private static final int EMBEDDING_DIMENSIONS = 1024;
 
     // Elasticsearch Configuration (Modify these as per your setup)
-    private static final String ES_URL = System.getProperty("es.url", "http://localhost:9200");
+//    private static final String ES_URL = System.getProperty("es.url", "http://localhost:9200");
+
+    private static final String ES_URL ="http://localhost:9200";
     private static final String ES_USERNAME = System.getProperty("es.user", "");
     private static final String ES_PASSWORD = System.getProperty("es.pass", "");
     private static final String ES_INDEX_NAME = "agentscope_rag_example";
@@ -60,9 +62,9 @@ public class ElasticsearchRAGExample {
         System.out.println("进行 es 数据库的连接");
 
         try(ElasticsearchStore elasticsearchStore = ElasticsearchStore.builder()
-                .url(ES_URL)
-                .username(ES_USERNAME)
-                .password(ES_PASSWORD)
+                .url("http://localhost:9200")
+//                .username("")
+//                .password("")
                 .indexName(ES_INDEX_NAME)
                 .dimensions(EMBEDDING_DIMENSIONS)
                 .build()) {
