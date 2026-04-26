@@ -1,5 +1,6 @@
 package com.coderpwh.advanced;
 
+import co.elastic.clients.util.BinaryData;
 import io.agentscope.core.ReActAgent;
 import io.agentscope.core.memory.InMemoryMemory;
 import io.agentscope.core.model.DashScopeChatModel;
@@ -77,9 +78,14 @@ public class ElasticsearchRAGExample {
             System.out.println("Knowledge 创建完成");
 
             System.out.println("开始创建es文档了");
+            addSampleDocuments(knowledge);
+            System.out.println("es 文档添加完成");
+            System.out.println("es, 索引的名称是:" + ES_INDEX_NAME);
 
-
+            System.out.println("开始进行 Agent RAG Model");
+            demonstrateAgenticMode(apikey, knowledge);
         } catch (Exception e) {
+            log.error("异常信息为:{}",e.getMessage());
 
         }
 
@@ -132,11 +138,11 @@ public class ElasticsearchRAGExample {
         }
     }
 
-    private static  void  demonstrateAgenticMode(String apiKey,Knowledge knowledge) throws IOException {
+    private static void demonstrateAgenticMode(String apiKey, Knowledge knowledge) throws IOException {
 
         ReActAgent agent = ReActAgent.builder()
                 .name("ES_RAG_Agent")
-                .sysPrompt( "你是一个有用的助手，可以访问 Elasticsearch"
+                .sysPrompt("你是一个有用的助手，可以访问 Elasticsearch"
                         + " 知识库。当用户提出技术问题时，使用"
                         + " retrieve_knowledge 工具在数据库中查找答案。"
                         + "如果可能，请始终注明你的信息来源。")
