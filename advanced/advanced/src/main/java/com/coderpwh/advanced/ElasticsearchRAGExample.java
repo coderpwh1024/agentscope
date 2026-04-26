@@ -1,19 +1,24 @@
 package com.coderpwh.advanced;
 
+import io.agentscope.core.ReActAgent;
+import io.agentscope.core.memory.InMemoryMemory;
 import io.agentscope.core.model.DashScopeChatModel;
 import io.agentscope.core.rag.Knowledge;
+import io.agentscope.core.rag.RAGMode;
 import io.agentscope.core.rag.knowledge.SimpleKnowledge;
 import io.agentscope.core.rag.model.Document;
 import io.agentscope.core.rag.reader.ReaderInput;
 import io.agentscope.core.rag.reader.SplitStrategy;
 import io.agentscope.core.rag.reader.TextReader;
 import io.agentscope.core.rag.store.ElasticsearchStore;
+import io.agentscope.core.tool.Toolkit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.agentscope.core.embedding.EmbeddingModel;
 import io.agentscope.core.embedding.dashscope.DashScopeTextEmbedding;
 import io.agentscope.core.formatter.dashscope.DashScopeChatFormatter;
 
+import java.io.IOException;
 import java.util.List;
 
 public class ElasticsearchRAGExample {
@@ -125,6 +130,40 @@ public class ElasticsearchRAGExample {
                 System.err.println("  Error adding document " + (i + 1) + ": " + e.getMessage());
             }
         }
+    }
+
+    private static  void  demonstrateAgenticMode(String apiKey,Knowledge knowledge) throws IOException {
+
+        ReActAgent agent = ReActAgent.builder()
+                .name("ES_RAG_Agent")
+                .sysPrompt( "你是一个有用的助手，可以访问 Elasticsearch"
+                        + " 知识库。当用户提出技术问题时，使用"
+                        + " retrieve_knowledge 工具在数据库中查找答案。"
+                        + "如果可能，请始终注明你的信息来源。")
+                .model(
+                        DashScopeChatModel.builder()
+                                .apiKey(apiKey)
+                                .modelName("qwen-max")
+                                .stream(true)
+                                .enableThinking(true)
+                                .formatter(new DashScopeChatFormatter())
+                                .build()
+
+                )
+                .toolkit(new Toolkit())
+                .memory(new InMemoryMemory())
+                .knowledge(knowledge)
+                .ragMode(RAGMode.AGENTIC)
+                .build();
+
+
+        System.out.println("开始进行知识检索");
+        System.out.println("agentScope是什么");
+        System.out.println("如何使用 es");
+        System.out.println("rag");
+
+        // Start interactive chat
+        ExampleUtils.startChat(agent);
     }
 
 
