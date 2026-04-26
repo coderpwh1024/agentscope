@@ -98,6 +98,7 @@ public class ExampleUtils {
                 System.out.println();
             } catch (Exception e) {
                 System.err.println("\nError: " + e.getMessage());
+                System.out.println("错误信息是:"+e.getMessage());
             }
         }
     }

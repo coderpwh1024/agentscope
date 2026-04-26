@@ -59,15 +59,13 @@ public class ElasticsearchRAGExample {
 
         System.out.println("进行 es 数据库的连接");
 
-        try {
-            ElasticsearchStore elasticsearchStore = ElasticsearchStore.builder()
-                    .url(ES_URL)
-                    .username(ES_USERNAME)
-                    .password(ES_PASSWORD)
-                    .indexName(ES_INDEX_NAME)
-                    .dimensions(EMBEDDING_DIMENSIONS)
-                    .build();
-
+        try(ElasticsearchStore elasticsearchStore = ElasticsearchStore.builder()
+                .url(ES_URL)
+                .username(ES_USERNAME)
+                .password(ES_PASSWORD)
+                .indexName(ES_INDEX_NAME)
+                .dimensions(EMBEDDING_DIMENSIONS)
+                .build()) {
             System.out.println("es 连接进行初始化等");
 
             Knowledge knowledge = SimpleKnowledge.builder()
@@ -86,8 +84,11 @@ public class ElasticsearchRAGExample {
             demonstrateAgenticMode(apikey, knowledge);
         } catch (Exception e) {
             log.error("异常信息为:{}",e.getMessage());
-
         }
+
+        System.out.println("\n=== Example completed ===");
+        // System.exit(0) is often needed with async libraries to kill lingering threads
+        System.exit(0);
 
 
     }
