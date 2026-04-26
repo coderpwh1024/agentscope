@@ -30,8 +30,8 @@ public class ElasticsearchRAGExample {
 
     // Elasticsearch Configuration (Modify these as per your setup)
     private static final String ES_URL = System.getProperty("es.url", "http://localhost:9200");
-    private static final String ES_USERNAME = System.getProperty("es.user", "elastic");
-    private static final String ES_PASSWORD = System.getProperty("es.pass", "changeme");
+    private static final String ES_USERNAME = System.getProperty("es.user", "");
+    private static final String ES_PASSWORD = System.getProperty("es.pass", "");
     private static final String ES_INDEX_NAME = "agentscope_rag_example";
 
 
