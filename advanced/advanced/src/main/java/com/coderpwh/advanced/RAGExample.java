@@ -3,6 +3,7 @@ package com.coderpwh.advanced;
 import io.agentscope.core.ReActAgent;
 import io.agentscope.core.embedding.EmbeddingModel;
 import io.agentscope.core.embedding.dashscope.DashScopeTextEmbedding;
+import io.agentscope.core.formatter.dashscope.DashScopeChatFormatter;
 import io.agentscope.core.memory.InMemoryMemory;
 import io.agentscope.core.model.DashScopeChatModel;
 import io.agentscope.core.rag.Knowledge;
@@ -114,9 +115,16 @@ public class RAGExample {
     }
 
 
+
+
+
+    /***
+     *  演示智能体模式
+     * @param apiKey
+     * @param knowledge
+     * @throws IOException
+     */
     private static void demonstrateAgenticMode(String apiKey, Knowledge knowledge) throws IOException {
-
-
         ReActAgent agent = ReActAgent.builder()
                 .name("RAGAgent")
                 .sysPrompt(
@@ -129,8 +137,8 @@ public class RAGExample {
                                 .apiKey(apiKey)
                                 .modelName("qwen-max")
                                 .stream(true)
-                                .enableThinking(true)
-                                .enableSearch(true)
+                                .enableThinking(false)
+                                .formatter(new DashScopeChatFormatter())
                                 .build()
                 )
                 .toolkit(new Toolkit())
