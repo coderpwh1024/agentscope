@@ -1,8 +1,12 @@
 package com.coderpwh.advanced;
 
+import io.agentscope.core.ReActAgent;
 import io.agentscope.core.embedding.EmbeddingModel;
 import io.agentscope.core.embedding.dashscope.DashScopeTextEmbedding;
+import io.agentscope.core.memory.InMemoryMemory;
+import io.agentscope.core.model.DashScopeChatModel;
 import io.agentscope.core.rag.Knowledge;
+import io.agentscope.core.rag.RAGMode;
 import io.agentscope.core.rag.knowledge.SimpleKnowledge;
 import io.agentscope.core.rag.model.Document;
 import io.agentscope.core.rag.reader.ReaderInput;
@@ -10,7 +14,10 @@ import io.agentscope.core.rag.reader.TextReader;
 import io.agentscope.core.rag.store.InMemoryStore;
 import io.agentscope.core.rag.store.VDBStoreBase;
 import io.agentscope.core.rag.reader.SplitStrategy;
+import io.agentscope.core.tool.Toolkit;
+import org.apache.poi.ss.formula.functions.T;
 
+import java.io.IOException;
 import java.util.List;
 
 public class RAGExample {
@@ -46,7 +53,7 @@ public class RAGExample {
 
         System.out.println("开始创建知识库");
 
-        Knowledge knowledge  = SimpleKnowledge.builder()
+        Knowledge knowledge = SimpleKnowledge.builder()
                 .embeddingModel(embeddingModel)
                 .embeddingStore(vdbStoreBase)
                 .build();
@@ -62,7 +69,7 @@ public class RAGExample {
      * 添加文档
      * @param knowledge
      */
-    private static  void addSampleDocuments(Knowledge knowledge) {
+    private static void addSampleDocuments(Knowledge knowledge) {
 
         String[] documents = {
                 "AgentScope is a multi-agent system framework developed by ModelScope. It provides a"
@@ -85,7 +92,7 @@ public class RAGExample {
 
         TextReader reader = new TextReader(512, SplitStrategy.PARAGRAPH, 50);
 
-        for(int i=0;i<documents.length;i++){
+        for (int i = 0; i < documents.length; i++) {
             String docText = documents[i];
             ReaderInput input = ReaderInput.fromString(docText);
             try {
@@ -99,10 +106,48 @@ public class RAGExample {
                                     + docText.substring(0, Math.min(50, docText.length()))
                                     + "...");
                 }
-            }catch (Exception e){
-                System.out.println("错误信息是:"+e.getMessage());
+            } catch (Exception e) {
+                System.out.println("错误信息是:" + e.getMessage());
             }
         }
+
+    }
+
+
+    private static void demonstrateAgenticMode(String apiKey, Knowledge knowledge) throws IOException {
+
+
+        ReActAgent agent = ReActAgent.builder()
+                .name("RAGAgent")
+                .sysPrompt(
+                        "你是一个乐于助人的助手,配备了知识检索工具。"
+                                + "当你需要从知识库中查找信息时,"
+                                + "请调用 retrieve_knowledge 工具。"
+                                + "并始终向用户说明你当前的操作。")
+                .model(
+                        DashScopeChatModel.builder()
+                                .apiKey(apiKey)
+                                .modelName("qwen-max")
+                                .stream(true)
+                                .enableThinking(true)
+                                .enableSearch(true)
+                                .build()
+                )
+                .toolkit(new Toolkit())
+                .memory(new InMemoryMemory())
+                .knowledge(knowledge)
+                .ragMode(RAGMode.AGENTIC)
+                .build();
+
+        System.out.println("开始进行智能体模式");
+        System.out.println("agentScope是什么");
+        System.out.println("RAG是什么?");
+        System.out.println("ReAct Agent 是什么？");
+
+        /**
+         * 启动会话
+         */
+        ExampleUtils.startChat(agent);
 
     }
 
