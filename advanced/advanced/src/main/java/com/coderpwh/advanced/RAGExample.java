@@ -10,6 +10,7 @@ import io.agentscope.core.rag.Knowledge;
 import io.agentscope.core.rag.RAGMode;
 import io.agentscope.core.rag.knowledge.SimpleKnowledge;
 import io.agentscope.core.rag.model.Document;
+import io.agentscope.core.rag.model.RetrieveConfig;
 import io.agentscope.core.rag.reader.ReaderInput;
 import io.agentscope.core.rag.reader.TextReader;
 import io.agentscope.core.rag.store.InMemoryStore;
@@ -115,7 +116,36 @@ public class RAGExample {
     }
 
 
+    private static void demonstrateGenericMode(String apiKey, Knowledge knowledge) throws IOException {
+        ReActAgent agent = ReActAgent.builder()
+                .name("RAGAssistant")
+                .sysPrompt(
+                        "你是一个有用的助手,可以访问知识库。"
+                                + "请使用提供的知识准确地回答问题。"
+                                + "如果知识库中不包含相关信息,"
+                                + "请明确说明。")
+                .model(
+                        DashScopeChatModel.builder()
+                                .apiKey(apiKey)
+                                .modelName("qwen-max")
+                                .stream(true)
+                                .enableThinking(false)
+                                .formatter(new DashScopeChatFormatter())
+                                .build()
+                )
+                .memory(new InMemoryMemory())
+                .toolkit(new Toolkit())
+                .knowledge(knowledge)
+                .retrieveConfig(RetrieveConfig.builder().limit(3).scoreThreshold(0.3).build())
+                .build();
 
+
+        System.out.println("开始进行通用模式");
+        System.out.println("什么是AgentScope?");
+        System.out.println("什么是RAG");
+        ExampleUtils.startChat(agent);
+
+    }
 
 
     /***
