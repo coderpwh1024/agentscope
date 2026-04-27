@@ -4,8 +4,14 @@ import io.agentscope.core.embedding.EmbeddingModel;
 import io.agentscope.core.embedding.dashscope.DashScopeTextEmbedding;
 import io.agentscope.core.rag.Knowledge;
 import io.agentscope.core.rag.knowledge.SimpleKnowledge;
+import io.agentscope.core.rag.model.Document;
+import io.agentscope.core.rag.reader.ReaderInput;
+import io.agentscope.core.rag.reader.TextReader;
 import io.agentscope.core.rag.store.InMemoryStore;
 import io.agentscope.core.rag.store.VDBStoreBase;
+import io.agentscope.core.rag.reader.SplitStrategy;
+
+import java.util.List;
 
 public class RAGExample {
     private static final int EMBEDDING_DIMENSIONS = 1024;
@@ -51,7 +57,52 @@ public class RAGExample {
 
     }
 
+
+    /***
+     * 添加文档
+     * @param knowledge
+     */
     private static  void addSampleDocuments(Knowledge knowledge) {
+
+        String[] documents = {
+                "AgentScope is a multi-agent system framework developed by ModelScope. It provides a"
+                        + " unified interface for building and managing multi-agent applications."
+                        + " AgentScope supports both synchronous and asynchronous agent communication.",
+                "AgentScope supports various agent types including ReActAgent, which implements the "
+                        + "ReAct (Reasoning and Acting) algorithm. ReActAgent combines reasoning and "
+                        + "acting in an iterative loop to solve complex tasks.",
+                "RAG (Retrieval-Augmented Generation) is a technique that enhances language models by"
+                        + " retrieving relevant information from a knowledge base before generating"
+                        + " responses. This allows models to access up-to-date information and reduce"
+                        + " hallucinations.",
+                "AgentScope Java is the Java implementation of AgentScope framework. It provides "
+                        + "reactive programming support using Project Reactor, making it suitable for "
+                        + "building scalable multi-agent systems.",
+                "Vector stores are used in RAG systems to store and search document embeddings. "
+                        + "AgentScope supports in-memory vector stores and can integrate with external "
+                        + "vector databases like Qdrant and ChromaDB."
+        };
+
+        TextReader reader = new TextReader(512, SplitStrategy.PARAGRAPH, 50);
+
+        for(int i=0;i<documents.length;i++){
+            String docText = documents[i];
+            ReaderInput input = ReaderInput.fromString(docText);
+            try {
+                List<Document> docs = reader.read(input).block();
+                if (docs != null && !docs.isEmpty()) {
+                    knowledge.addDocuments(docs).block();
+                    System.out.println(
+                            "  Added document "
+                                    + (i + 1)
+                                    + ": "
+                                    + docText.substring(0, Math.min(50, docText.length()))
+                                    + "...");
+                }
+            }catch (Exception e){
+                System.out.println("错误信息是:"+e.getMessage());
+            }
+        }
 
     }
 
