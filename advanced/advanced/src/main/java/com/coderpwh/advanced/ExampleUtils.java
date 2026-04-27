@@ -23,8 +23,8 @@ public class ExampleUtils {
      * @return The API key
      */
     public static String getDashScopeApiKey() {
-//        String apiKey = System.getenv("DASHSCOPE_API_KEY");
-        String apiKey = " ";
+        String apiKey = System.getenv("DASHSCOPE_API_KEY");
+//        String apiKey = " ";
         if (apiKey == null || apiKey.isEmpty()) {
             System.err.println("Error: DASHSCOPE_API_KEY environment variable not set.");
             System.err.println("Please set it with: export DASHSCOPE_API_KEY=your_api_key");
