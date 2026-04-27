@@ -24,7 +24,6 @@ public class RAGExample {
     private static final int EMBEDDING_DIMENSIONS = 1024;
 
     public static void main(String[] args) throws IOException {
-
         ExampleUtils.printWelcome(
                 "RAG(检索增强生成)示例",
                 "本示例演示 RAG 功能:\n"
