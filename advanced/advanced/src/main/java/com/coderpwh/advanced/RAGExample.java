@@ -17,15 +17,13 @@ import io.agentscope.core.rag.store.InMemoryStore;
 import io.agentscope.core.rag.store.VDBStoreBase;
 import io.agentscope.core.rag.reader.SplitStrategy;
 import io.agentscope.core.tool.Toolkit;
-import org.apache.poi.ss.formula.functions.T;
-
 import java.io.IOException;
 import java.util.List;
 
 public class RAGExample {
     private static final int EMBEDDING_DIMENSIONS = 1024;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
         ExampleUtils.printWelcome(
                 "RAG(检索增强生成)示例",
@@ -61,9 +59,19 @@ public class RAGExample {
                 .build();
 
         System.out.println("知识库创建完毕");
-
         System.out.println("开始进行知识添加");
 
+        addSampleDocuments(knowledge);
+        System.out.println("文档添加完毕");
+
+        System.out.println("Agentic RAG Mode");
+
+        System.out.println(
+                "在 Agentic(智能体)模式下,智能体会自行决定何时\n"
+                        + "通过 retrieve_knowledge 工具来检索知识。这使智能体\n"
+                        + "能够更灵活地控制知识的使用时机。\n");
+        demonstrateAgenticMode(apiKey, knowledge);
+        System.out.println("\n=== All examples completed ===");
     }
 
 
