@@ -20,13 +20,19 @@ public class McpService {
     private final Map<String, McpClientWrapper> mcpClients = new ConcurrentHashMap<>();
 
 
+    /***
+     * 添加 mcp 服务
+     * @param request
+     * @param toolkit
+     * @return
+     */
+
     public Mono<Void> addMcpServer(McpConfigRequest request, Toolkit toolkit) {
 
         String name = request.getName();
         if (mcpClients.containsKey(name)) {
             return Mono.error(new IllegalArgumentException("MCP server already exists: " + name));
         }
-
 
         return buildMcpClient(request)
                 .flatMap(
