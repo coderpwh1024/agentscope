@@ -3,13 +3,16 @@ package com.coderpwh.htilchat.service;
 import com.coderpwh.htilchat.dto.ChatEvent;
 import com.coderpwh.htilchat.hook.ToolConfirmationHook;
 import com.coderpwh.htilchat.tools.BuiltinTools;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.agentscope.core.ReActAgent;
 import io.agentscope.core.formatter.dashscope.DashScopeChatFormatter;
 import io.agentscope.core.memory.InMemoryMemory;
+import io.agentscope.core.message.ContentBlock;
 import io.agentscope.core.message.Msg;
 import io.agentscope.core.message.MsgRole;
 import io.agentscope.core.message.TextBlock;
+import io.agentscope.core.message.ToolResultBlock;
 import io.agentscope.core.model.DashScopeChatModel;
 import io.agentscope.core.session.InMemorySession;
 import io.agentscope.core.session.Session;
@@ -21,6 +24,8 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -130,6 +135,73 @@ public class AgentService {
                         error ->
                                 Flux.just(
                                         ChatEvent.error(error.getMessage()), ChatEvent.complete()));
+
+    }
+
+
+    /***
+     *  额外处理文本
+     * @param msg
+     * @return
+     */
+    private String extractText(Msg msg) {
+        List<TextBlock> textBlocks = msg.getContentBlocks(TextBlock.class);
+
+        if (textBlocks.isEmpty()) {
+            return null;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (TextBlock tb : textBlocks) {
+            sb.append(tb.getText());
+        }
+        return sb.toString();
+    }
+
+
+    /***
+     *  额外处理工具输出
+     * @param result
+     * @return
+     */
+    private String extractToolOutput(ToolResultBlock result) {
+        List<ContentBlock> outputs = result.getOutput();
+
+        if (outputs == null || outputs.isEmpty()) {
+            return "";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (ContentBlock block : outputs) {
+            if (block instanceof TextBlock tb) {
+                sb.append(tb.getText());
+            }
+        }
+        return sb.toString();
+    }
+
+
+    /**
+     * 转换
+     *
+     * @param input
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> convertInput(Object input) {
+        if (input == null) {
+            return Map.of();
+        }
+
+        if (input instanceof Map) {
+            return (Map<String, Object>) input;
+        }
+        try {
+            return OBJECT_MAPPER.convertValue(input, new TypeReference<Map<String, Object>>() {
+            });
+        } catch (Exception e) {
+            return Map.of("value", input.toString());
+        }
 
     }
 
