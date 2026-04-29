@@ -4,6 +4,9 @@ import com.coderpwh.htilchat.hook.ToolConfirmationHook;
 import com.coderpwh.htilchat.tools.BuiltinTools;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.agentscope.core.ReActAgent;
+import io.agentscope.core.formatter.dashscope.DashScopeChatFormatter;
+import io.agentscope.core.memory.InMemoryMemory;
+import io.agentscope.core.model.DashScopeChatModel;
 import io.agentscope.core.session.InMemorySession;
 import io.agentscope.core.session.Session;
 import io.agentscope.core.tool.Toolkit;
@@ -69,8 +72,37 @@ public class AgentService {
     }
 
 
+    /***
+     *  创建智能体
+     * @param sessionId
+     * @return
+     */
+    private ReActAgent createAgent(String sessionId) {
+        Toolkit sessionToolkit = sharedToolkit.copy();
+
+        ReActAgent agent = ReActAgent.builder()
+                .name("Assistant")
+                .sysPrompt(
+                        "你是一个智能助手，能够调用多种工具。"
+                                + "请在合适的场景下使用这些工具来协助用户完成任务。")
+                .model(
+                        DashScopeChatModel.builder()
+                                .apiKey(apiKey)
+                                .modelName(modelName)
+                                .stream(true)
+                                .enableThinking(false)
+                                .formatter(new DashScopeChatFormatter())
+                                .build())
+                .toolkit(sessionToolkit)
+                .memory(new InMemoryMemory())
+                .hook(confirmationHook)
+                .build();
+        agent.loadIfExists(session, sessionId);
+        return agent;
+    }
 
 
+    
 
 
 }
