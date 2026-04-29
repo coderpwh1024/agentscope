@@ -1,11 +1,15 @@
 package com.coderpwh.htilchat.service;
 
+import com.coderpwh.htilchat.dto.ChatEvent;
 import com.coderpwh.htilchat.hook.ToolConfirmationHook;
 import com.coderpwh.htilchat.tools.BuiltinTools;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.agentscope.core.ReActAgent;
 import io.agentscope.core.formatter.dashscope.DashScopeChatFormatter;
 import io.agentscope.core.memory.InMemoryMemory;
+import io.agentscope.core.message.Msg;
+import io.agentscope.core.message.MsgRole;
+import io.agentscope.core.message.TextBlock;
 import io.agentscope.core.model.DashScopeChatModel;
 import io.agentscope.core.session.InMemorySession;
 import io.agentscope.core.session.Session;
@@ -14,6 +18,7 @@ import io.agentscope.core.tool.file.ReadFileTool;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -101,8 +106,32 @@ public class AgentService {
         return agent;
     }
 
+    public Flux<ChatEvent> chat(String sessionId, String message) {
 
-    
+        ReActAgent agent = createAgent(sessionId);
+
+        runningAgents.put(sessionId, agent);
+
+        Msg userMsg = Msg.builder()
+                .name("User")
+                .role(MsgRole.USER)
+                .content(TextBlock.builder().text(message).build())
+                .build();
+
+        return agent.stream(userMsg)
+                .flatMap(this::convertEventToChatEvents)
+                .concatWith(Flux.just(ChatEvent.complete()))
+                .doFinally(
+                        signal -> {
+                            runningAgents.remove(sessionId);
+                            agent.saveTo(session, sessionId);
+                        })
+                .onErrorResume(
+                        error ->
+                                Flux.just(
+                                        ChatEvent.error(error.getMessage()), ChatEvent.complete()));
+
+    }
 
 
 }
