@@ -6,6 +6,7 @@ import com.coderpwh.htilchat.tools.BuiltinTools;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.agentscope.core.ReActAgent;
+import io.agentscope.core.agent.Event;
 import io.agentscope.core.formatter.dashscope.DashScopeChatFormatter;
 import io.agentscope.core.memory.InMemoryMemory;
 import io.agentscope.core.message.ContentBlock;
@@ -13,6 +14,7 @@ import io.agentscope.core.message.Msg;
 import io.agentscope.core.message.MsgRole;
 import io.agentscope.core.message.TextBlock;
 import io.agentscope.core.message.ToolResultBlock;
+import io.agentscope.core.message.ToolUseBlock;
 import io.agentscope.core.model.DashScopeChatModel;
 import io.agentscope.core.session.InMemorySession;
 import io.agentscope.core.session.Session;
@@ -23,10 +25,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -136,6 +140,69 @@ public class AgentService {
                                 Flux.just(
                                         ChatEvent.error(error.getMessage()), ChatEvent.complete()));
 
+    }
+
+
+    /**
+     * 转换事件
+     * @param event
+     * @return
+     */
+    private Flux<ChatEvent> convertEventToChatEvents(Event event) {
+        List<ChatEvent> events = new ArrayList<>();
+        Msg msg = event.getMessage();
+        switch (event.getType()) {
+            case REASONING -> {
+                if (event.isLast() && msg.hasContentBlocks(ToolUseBlock.class)) {
+                    List<ToolUseBlock> toolCalls = msg.getContentBlocks(ToolUseBlock.class);
+                    boolean hasDangerous =
+                            toolCalls.stream()
+                                    .anyMatch(t -> confirmationHook.isDangerous(t.getName()));
+                    if (hasDangerous) {
+                        List<ChatEvent.PendingToolCall> pending = new ArrayList<>();
+                        for (ToolUseBlock tool : toolCalls) {
+                            pending.add(
+                                    new ChatEvent.PendingToolCall(
+                                            tool.getId(),
+                                            tool.getName(),
+                                            convertInput(tool.getInput()),
+                                            confirmationHook.isDangerous(tool.getName())));
+                        }
+                        events.add(ChatEvent.toolConfirm(pending));
+                    } else {
+                        for (ToolUseBlock tool : toolCalls) {
+                            events.add(
+                                    ChatEvent.toolUse(
+                                            tool.getId(),
+                                            tool.getName(),
+                                            convertInput(tool.getInput())));
+                        }
+                    }
+                } else {
+                    String text = extractText(msg);
+                    if (text != null && !text.isEmpty()) {
+                        events.add(ChatEvent.text(text, !event.isLast()));
+                    }
+                }
+            }
+            case TOOL_RESULT -> {
+                for (ToolResultBlock result : msg.getContentBlocks(ToolResultBlock.class)) {
+                    events.add(
+                            ChatEvent.toolResult(
+                                    result.getId(), result.getName(), extractToolOutput(result)));
+                }
+            }
+            case AGENT_RESULT -> {
+                String text = msg.getTextContent();
+                if (text != null && !text.isEmpty()) {
+                    events.add(ChatEvent.text(text, false));
+                }
+            }
+            default -> {
+            }
+        }
+
+        return Flux.fromIterable(events);
     }
 
 
