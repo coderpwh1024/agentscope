@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,7 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 
 import java.rmi.ServerError;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author coderpwh
@@ -101,4 +104,52 @@ public class ChatController {
     }
 
 
-}
+    /**
+     * mcp 列表
+     *
+     * @return
+     */
+    @GetMapping("/mcp/list")
+    public ResponseEntity<List<String>> listMcpService() {
+        return ResponseEntity.ok(mcpService.listMcpServers());
+    }
+
+
+    /***
+     * 工具
+     * @return
+     */
+    @GetMapping("/tools")
+    public ResponseEntity<Set<String>> getTools(){
+        return  ResponseEntity.ok(agentService.getToolNames());
+    }
+
+
+    /**
+     * 危险工具
+     * @return
+     */
+    @GetMapping("/settings/dangerous-tools")
+    public ResponseEntity<Set<String>> getDangerousTools() {
+        return ResponseEntity.ok(agentService.getConfirmationHook().getDangerousTools());
+    }
+
+    /***
+     * 设置危险工具
+     * @param toolNames
+     * @return
+     */
+    @PostMapping("/settings/dangerous-tools")
+    public ResponseEntity<Map<String, Object>> setDangerousTools(
+            @RequestBody Set<String> toolNames) {
+        agentService.getConfirmationHook().setDangerousTools(toolNames);
+        return ResponseEntity.ok(Map.of("success", true));
+    }
+
+
+
+
+
+
+
+    }
