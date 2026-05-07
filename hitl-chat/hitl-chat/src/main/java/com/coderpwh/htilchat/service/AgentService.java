@@ -1,12 +1,14 @@
 package com.coderpwh.htilchat.service;
 
 import com.coderpwh.htilchat.dto.ChatEvent;
+import com.coderpwh.htilchat.dto.ToolConfirmRequest;
 import com.coderpwh.htilchat.hook.ToolConfirmationHook;
 import com.coderpwh.htilchat.tools.BuiltinTools;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.agentscope.core.ReActAgent;
 import io.agentscope.core.agent.Event;
+import io.agentscope.core.agent.StreamOptions;
 import io.agentscope.core.formatter.dashscope.DashScopeChatFormatter;
 import io.agentscope.core.memory.InMemoryMemory;
 import io.agentscope.core.message.ContentBlock;
@@ -18,6 +20,8 @@ import io.agentscope.core.message.ToolUseBlock;
 import io.agentscope.core.model.DashScopeChatModel;
 import io.agentscope.core.session.InMemorySession;
 import io.agentscope.core.session.Session;
+import io.agentscope.core.state.SessionKey;
+import io.agentscope.core.state.SimpleSessionKey;
 import io.agentscope.core.tool.Toolkit;
 import io.agentscope.core.tool.file.ReadFileTool;
 import jakarta.annotation.PostConstruct;
@@ -140,6 +144,99 @@ public class AgentService {
                                 Flux.just(
                                         ChatEvent.error(error.getMessage()), ChatEvent.complete()));
 
+    }
+
+    /**
+     * Confirm or reject pending tool execution.
+     */
+    public Flux<ChatEvent> confirmTool(
+            String sessionId, boolean confirmed, String reason, List<ToolConfirmRequest.ToolCallInfo> toolCalls) {
+        ReActAgent agent = createAgent(sessionId);
+        runningAgents.put(sessionId, agent);
+
+        if (confirmed) {
+            return agent.stream(StreamOptions.defaults())
+                    .flatMap(this::convertEventToChatEvents)
+                    .concatWith(Flux.just(ChatEvent.complete()))
+                    .doFinally(
+                            signal -> {
+                                runningAgents.remove(sessionId);
+                                agent.saveTo(session, sessionId);
+                            })
+                    .onErrorResume(
+                            error ->
+                                    Flux.just(
+                                            ChatEvent.error(error.getMessage()),
+                                            ChatEvent.complete()));
+        } else {
+            List<ToolResultBlock> results = new ArrayList<>();
+            String cancelMessage = reason != null ? reason : "Operation cancelled by user";
+            if (toolCalls != null) {
+                for (ToolConfirmRequest.ToolCallInfo tool : toolCalls) {
+                    results.add(
+                            ToolResultBlock.of(
+                                    tool.getId(),
+                                    tool.getName(),
+                                    TextBlock.builder().text(cancelMessage).build()));
+                }
+            }
+            Msg cancelResult =
+                    Msg.builder()
+                            .name("Assistant")
+                            .role(MsgRole.TOOL)
+                            .content(results.toArray(new ToolResultBlock[0]))
+                            .build();
+
+            return agent.stream(cancelResult)
+                    .flatMap(this::convertEventToChatEvents)
+                    .concatWith(Flux.just(ChatEvent.complete()))
+                    .doFinally(
+                            signal -> {
+                                runningAgents.remove(sessionId);
+                                agent.saveTo(session, sessionId);
+                            })
+                    .onErrorResume(
+                            error ->
+                                    Flux.just(
+                                            ChatEvent.error(error.getMessage()),
+                                            ChatEvent.complete()));
+        }
+    }
+
+    /**
+     * Clear a session.
+     */
+    public void clearSession(String sessionId) {
+        session.delete(SimpleSessionKey.of(sessionId));
+    }
+
+    /**
+     * Interrupt a running agent by sessionId.
+     *
+     * @param sessionId the session ID
+     * @return true if an agent was found and interrupted, false otherwise
+     */
+    public boolean interrupt(String sessionId) {
+        ReActAgent agent = runningAgents.get(sessionId);
+        if (agent != null) {
+            agent.interrupt();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Check if a session exists.
+     */
+    public boolean sessionExists(String sessionId) {
+        return session.exists(SimpleSessionKey.of(sessionId));
+    }
+
+    /**
+     * Get all session keys.
+     */
+    public Set<SessionKey> listSessionKeys() {
+        return session.listSessionKeys();
     }
 
 
