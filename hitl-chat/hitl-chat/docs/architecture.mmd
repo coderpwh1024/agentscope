@@ -1,0 +1,30 @@
+%% HITL-Chat 架构图（C4 Container 风格）
+flowchart TB
+    Client["浏览器 / Client<br/>SSE consumer"]
+
+    subgraph SB["Spring Boot WebFlux (port 7003)"]
+        direction TB
+        Ctrl["ChatController<br/>/api/*"]
+        subgraph SVC["Service Layer"]
+            direction LR
+            AS["AgentService<br/>- sharedToolkit<br/>- confirmationHook<br/>- runningAgents<br/>- InMemorySession"]
+            MS["McpService<br/>- mcpClients map<br/>- STDIO / SSE / HTTP"]
+        end
+        subgraph AGENT["AgentScope ReActAgent (per session)"]
+            direction TB
+            Model["DashScopeChatModel<br/>(Qwen, stream=true)"]
+            TK["Toolkit<br/>(Builtin + ReadFile + MCP)"]
+            Hook["ToolConfirmationHook<br/>(PostReasoningEvent)"]
+            Mem["InMemoryMemory ⇄ InMemorySession"]
+        end
+    end
+
+    DS["Aliyun Bailian / Qwen-plus"]
+    MCP["MCP servers<br/>(stdio / SSE / HTTP)"]
+
+    Client -- "HTTP + SSE" --> Ctrl
+    Ctrl --> AS
+    AS <--> MS
+    AS -- "build / load / save" --> AGENT
+    AGENT -- "OpenAPI" --> DS
+    TK -- "tool transport" --> MCP

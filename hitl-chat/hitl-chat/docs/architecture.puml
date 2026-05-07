@@ -1,0 +1,35 @@
+@startuml hitl-chat-architecture
+!define RECTANGLE class
+title HITL-Chat 架构图（C4 Container 风格）
+
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam roundCorner 10
+
+actor "Browser / Client\n(SSE consumer)" as Client
+
+package "Spring Boot WebFlux (port 7003)" as SB {
+  component "ChatController\n/api/*" as Ctrl
+  package "Service Layer" as SVC {
+    component "AgentService\n- sharedToolkit\n- confirmationHook\n- runningAgents\n- InMemorySession" as AS
+    component "McpService\n- mcpClients\n- STDIO / SSE / HTTP" as MS
+  }
+  package "AgentScope ReActAgent (per session)" as AGENT {
+    component "DashScopeChatModel\n(Qwen, stream=true)" as Model
+    component "Toolkit\n(Builtin + ReadFile + MCP)" as TK
+    component "ToolConfirmationHook\n(PostReasoningEvent)" as Hook
+    component "InMemoryMemory\n⇄ InMemorySession" as Mem
+  }
+}
+
+cloud "Aliyun Bailian / Qwen-plus" as DS
+cloud "MCP servers\n(stdio / SSE / HTTP)" as MCP
+
+Client --> Ctrl : HTTP + SSE
+Ctrl --> AS
+AS <--> MS
+AS --> AGENT : build / load / save
+AGENT --> DS : OpenAPI
+TK --> MCP : tool transport
+
+@enduml

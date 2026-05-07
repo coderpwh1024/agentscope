@@ -1,0 +1,62 @@
+@startuml hitl-chat-sequence
+title HITL-Chat 危险工具人工确认时序图
+
+autonumber
+skinparam shadowing false
+skinparam roundCorner 8
+
+actor Client as C
+participant "ChatController" as Ctrl
+participant "AgentService" as AS
+participant "ReActAgent" as Agent
+participant "ToolConfirmationHook" as Hook
+participant "DashScope (Qwen)" as LLM
+participant "Toolkit\n(Builtin / MCP)" as Tool
+
+C -> Ctrl : POST /api/chat\n{sessionId, message}
+Ctrl -> AS : chat(sessionId, message)
+AS -> Agent : createAgent() + loadIfExists()
+AS -> AS : runningAgents.put(sessionId, agent)
+AS -> Agent : agent.stream(userMsg)
+Agent -> LLM : reasoning request (stream)
+LLM --> Agent : ToolUseBlock(s)
+Agent -> Hook : PostReasoningEvent
+
+alt 命中危险工具
+  Hook --> Agent : stopAgent()
+  Agent --> AS : Event(REASONING, isLast=true, ToolUse)
+  AS --> Ctrl : ChatEvent.toolConfirm(pending[])
+  Ctrl --> C : SSE TOOL_CONFIRM
+  ... 用户决策 ...
+  C -> Ctrl : POST /api/chat/confirm
+  Ctrl -> AS : confirmTool(sessionId, confirmed, reason, toolCalls)
+  AS -> Agent : createAgent() + loadIfExists()
+  alt confirmed = true
+    AS -> Agent : agent.stream(StreamOptions.defaults())
+    Agent -> Tool : 执行工具
+    Tool --> Agent : ToolResultBlock
+    Agent -> LLM : 继续 reasoning
+    LLM --> Agent : 文本回复
+  else confirmed = false
+    AS -> Agent : agent.stream(MsgRole.TOOL + 取消文案)
+    Agent -> LLM : 反馈"用户取消"
+    LLM --> Agent : 改路文本回复
+  end
+else 非危险工具
+  Hook --> Agent : 放行
+  Agent -> Tool : 直接执行
+  Tool --> Agent : ToolResultBlock
+  Agent -> LLM : 继续 reasoning
+end
+
+Agent --> AS : Event 流\n(REASONING / TOOL_RESULT / AGENT_RESULT)
+AS --> Ctrl : ChatEvent 流\n(TEXT / TOOL_USE / TOOL_RESULT)
+Ctrl --> C : SSE 事件流 + COMPLETE
+
+note over AS
+  doFinally:
+  runningAgents.remove(sessionId)
+  agent.saveTo(session, sessionId)
+end note
+
+@enduml

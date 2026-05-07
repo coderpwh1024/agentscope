@@ -1,0 +1,53 @@
+%% HITL-Chat 组件依赖图
+flowchart LR
+    subgraph dto["dto"]
+        ChatRequest
+        ChatEvent
+        McpConfigRequest
+        ToolConfirmRequest
+    end
+
+    subgraph controller["controller"]
+        ChatController
+    end
+
+    subgraph service["service"]
+        AgentService
+        McpService
+    end
+
+    subgraph hook["hook"]
+        ToolConfirmationHook
+    end
+
+    subgraph tools["tools"]
+        BuiltinTools
+    end
+
+    subgraph external["AgentScope core"]
+        ReActAgent
+        Toolkit
+        InMemorySession
+        DashScopeChatModel
+        Hook["Hook 接口"]
+    end
+
+    ChatController --> AgentService
+    ChatController --> McpService
+    ChatController --> ChatEvent
+    ChatController --> ChatRequest
+    ChatController --> ToolConfirmRequest
+
+    AgentService --> ToolConfirmationHook
+    AgentService --> BuiltinTools
+    AgentService --> ReActAgent
+    AgentService --> Toolkit
+    AgentService --> InMemorySession
+    AgentService --> DashScopeChatModel
+    AgentService --> ChatEvent
+
+    McpService --> Toolkit
+    McpService --> McpConfigRequest
+
+    ToolConfirmationHook --> Hook
+    BuiltinTools -.@Tool.-> Toolkit

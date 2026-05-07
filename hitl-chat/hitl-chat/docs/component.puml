@@ -1,0 +1,60 @@
+@startuml hitl-chat-components
+title HITL-Chat 组件依赖图
+
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam roundCorner 8
+
+package "dto" {
+  [ChatRequest]
+  [ChatEvent]
+  [McpConfigRequest]
+  [ToolConfirmRequest]
+}
+
+package "controller" {
+  [ChatController]
+}
+
+package "service" {
+  [AgentService]
+  [McpService]
+}
+
+package "hook" {
+  [ToolConfirmationHook]
+}
+
+package "tools" {
+  [BuiltinTools]
+}
+
+package "AgentScope core (external)" {
+  [ReActAgent]
+  [Toolkit]
+  [InMemorySession]
+  [DashScopeChatModel]
+  [Hook 接口] as HookIface
+}
+
+[ChatController] --> [AgentService]
+[ChatController] --> [McpService]
+[ChatController] --> [ChatEvent]
+[ChatController] --> [ChatRequest]
+[ChatController] --> [ToolConfirmRequest]
+
+[AgentService] --> [ToolConfirmationHook]
+[AgentService] --> [BuiltinTools]
+[AgentService] --> [ReActAgent]
+[AgentService] --> [Toolkit]
+[AgentService] --> [InMemorySession]
+[AgentService] --> [DashScopeChatModel]
+[AgentService] --> [ChatEvent]
+
+[McpService] --> [Toolkit]
+[McpService] --> [McpConfigRequest]
+
+[ToolConfirmationHook] ..|> HookIface
+[BuiltinTools] ..> [Toolkit] : @Tool 注册
+
+@enduml
