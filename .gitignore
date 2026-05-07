@@ -1,0 +1,8 @@
+# macOS
+.DS_Store
+
+# JetBrains IDE
+.idea/
+*.iml
+*.iws
+*.ipr
