@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 
-import java.rmi.ServerError;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -52,7 +51,7 @@ public class ChatController {
         String sessionId = request.getSessionId();
 
         if (sessionId == null || sessionId.isEmpty()) {
-            sessionId = "defalut";
+            sessionId = "default";
         }
         return agentService.chat(sessionId, request.getMessage()).map(event -> ServerSentEvent.builder(event).build());
     }
@@ -69,7 +68,7 @@ public class ChatController {
         String sessionId = request.getSessionId();
 
         if (sessionId == null || sessionId.isEmpty()) {
-            sessionId = "defalut";
+            sessionId = "default";
         }
 
         return agentService.confirmTool(sessionId, request.isConfirmed(), request.getReason(), request.getToolCalls())

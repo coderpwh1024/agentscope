@@ -52,7 +52,7 @@ public class McpService {
      */
     public Mono<Void> removeMcpServer(String name, Toolkit toolkit) {
         McpClientWrapper mcpClient = mcpClients.remove(name);
-        if (mcpClient != null) {
+        if (mcpClient == null) {
             return Mono.error(new IllegalArgumentException("MCP server not found: " + name));
         }
 
