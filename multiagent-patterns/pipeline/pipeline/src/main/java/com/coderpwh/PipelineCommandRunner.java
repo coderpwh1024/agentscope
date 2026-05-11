@@ -1,5 +1,6 @@
 package com.coderpwh;
 
+import com.alibaba.cloud.ai.graph.exception.GraphRunnerException;
 import com.alibaba.cloud.ai.graph.exception.GraphStateException;
 import com.coderpwh.service.PipelineService;
 import org.slf4j.Logger;
@@ -54,8 +55,10 @@ public class PipelineCommandRunner implements ApplicationRunner {
     }
 
 
+    /***
+     * 运行并行流水线
+     */
     private void runParallelDemo() {
-
         String input = "AI agents in enterprise software";
         log.info("--- ParallelAgent demo ---");
         log.info("Input: {}", input);
@@ -66,8 +69,22 @@ public class PipelineCommandRunner implements ApplicationRunner {
         } catch (Exception e) {
             log.error("Parallel pipeline failed", e);
         }
-
     }
+
+    private void runLoopDemo() {
+        String input = "Find customers who placed more than 3 orders in 2024";
+        log.info("--- LoopAgent demo ---");
+        log.info("Input: {}", input);
+        try {
+            PipelineService.LoopResult result = pipelineService.runLoop(input);
+            log.info("SQL: {}", result.sql());
+            log.info("Score: {}", result.score());
+        } catch (GraphRunnerException e) {
+            log.error("Loop pipeline failed", e);
+        }
+    }
+
+
 
 
     /***
