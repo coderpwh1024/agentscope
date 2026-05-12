@@ -15,7 +15,8 @@ public class PipelineModelConfig {
 
     @Bean
     public Model dashScopeChatModel() {
-     String key = System.getenv("DASH_SCOPE_KEY");
+//        String key = System.getenv("DASH_SCOPE_KEY");
+        String key ="";
         return DashScopeChatModel.builder().apiKey(key).modelName("qwen-plus").build();
     }
 

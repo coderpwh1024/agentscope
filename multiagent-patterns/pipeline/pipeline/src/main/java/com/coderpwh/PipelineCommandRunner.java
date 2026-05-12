@@ -32,7 +32,13 @@ public class PipelineCommandRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        log.info("=== Pipeline Command Runner (test) ===");
+
+        log.info("开始运行管道");
+        runSequentialDemo();
+//        runParallelDemo();
+//        runLoopDemo();
+
+        log.info("管道运行结束");
 
     }
 
@@ -83,8 +89,6 @@ public class PipelineCommandRunner implements ApplicationRunner {
             log.error("Loop pipeline failed", e);
         }
     }
-
-
 
 
     /***
