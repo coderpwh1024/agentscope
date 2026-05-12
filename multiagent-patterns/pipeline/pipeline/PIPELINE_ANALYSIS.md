@@ -2,7 +2,7 @@
 
 > 项目路径：`agentscope/multiagent-patterns/pipeline/pipeline`
 > 技术栈：Spring Boot 4.0.1 + Spring AI Alibaba 1.1.2.2 + AgentScope 1.0.10 + DashScope（通义千问）
-> Java 版本：17
+> Java 版本：21
 > 作者：coderpwh
 
 ---
