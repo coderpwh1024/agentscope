@@ -34,9 +34,9 @@ public class PipelineCommandRunner implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
 
         log.info("开始运行管道");
-        runSequentialDemo();
+//        runSequentialDemo();
 //        runParallelDemo();
-//        runLoopDemo();
+        runLoopDemo();
 
         log.info("管道运行结束");
 
