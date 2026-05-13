@@ -22,7 +22,7 @@ public class RoutingGraphRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        String query = "How do I authenticate API requests?";
+        String query = "搜索github上面的x001编码";
         log.info("Query:{}", query);
 
         RoutingGraphService.RoutingGraphResult result = routingGraphService.run(query);
