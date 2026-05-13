@@ -15,7 +15,10 @@ public class NotionStubTools {
                 + " JWT tokens";
     }
 
-
+    @Tool(name = "get_page", description = "Get a specific Notion page By Id.")
+    public String getPage(@ToolParam(name = "pageId", description = "Notion page Id") String pageId) {
+        return "Page content: Step-by-step authentication setup instructions";
+    }
 
 
 }
