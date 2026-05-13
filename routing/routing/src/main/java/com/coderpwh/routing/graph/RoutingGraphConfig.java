@@ -73,15 +73,15 @@ public class RoutingGraphConfig {
      * @return
      */
     @Bean
-    public AgentScopeAgent githubAgent() {
+    public AgentScopeAgent githubAgent(Model dashScopeChatModel, GitHubStubTools githubStubTools) {
         Toolkit toolkit = new Toolkit();
-        toolkit.registerTool(gitHubStubTools);
+        toolkit.registerTool(githubStubTools);
 
         ReActAgent.Builder builder = ReActAgent.builder()
                 .name("github")
                 .description("Github specialist for code,issues,and PRS")
                 .sysPrompt(GITHUB_PROMPT)
-                .model(dashScopeModel())
+                .model(dashScopeChatModel)
                 .toolkit(toolkit)
                 .memory(new InMemoryMemory());
 
@@ -99,7 +99,7 @@ public class RoutingGraphConfig {
      * @return
      */
     @Bean
-    public AgentScopeAgent notionAgent() {
+    public AgentScopeAgent notionAgent(Model dashScopeChatModel, NotionStubTools notionStubTools) {
         Toolkit toolkit = new Toolkit();
         toolkit.registerTool(notionStubTools);
 
@@ -107,7 +107,7 @@ public class RoutingGraphConfig {
                 .name("notion")
                 .description("notion specialist for docs and wikis")
                 .sysPrompt(NOTION_PROMPT)
-                .model(dashScopeModel())
+                .model(dashScopeChatModel)
                 .toolkit(toolkit)
                 .memory(new InMemoryMemory());
 
@@ -127,7 +127,7 @@ public class RoutingGraphConfig {
      * @return
      */
     @Bean
-    public AgentScopeAgent slackAgent(SlackStubTools slackStubTools) {
+    public AgentScopeAgent slackAgent(Model dashScopeChatModel, SlackStubTools slackStubTools) {
         Toolkit toolkit = new Toolkit();
         toolkit.registerTool(slackStubTools);
 
@@ -135,7 +135,7 @@ public class RoutingGraphConfig {
                 .name("slack")
                 .description("Slack specialist for messages and threads")
                 .sysPrompt(SLACK_PROMPT)
-                .model(dashScopeModel())
+                .model(dashScopeChatModel)
                 .toolkit(toolkit)
                 .memory(new InMemoryMemory());
 
@@ -208,6 +208,7 @@ public class RoutingGraphConfig {
 
     /**
      * 路由服务
+     *
      * @param routingGraph
      * @return
      */
