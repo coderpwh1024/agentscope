@@ -26,4 +26,9 @@ public class GitHubStubTools {
                 "03 (token refresh)";
     }
 
+    @Tool(name = "search_prs", description = "Search pull requests for implementation details.")
+    public String searchPrs(@ToolParam(name = "query", description = "Search query") String query) {
+        return "PR #156 added JWT authentication, PR #178 updated OAuth scopes";
+    }
+
 }
