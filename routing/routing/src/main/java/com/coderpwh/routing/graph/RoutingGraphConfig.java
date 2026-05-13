@@ -11,6 +11,7 @@ import com.alibaba.cloud.ai.graph.state.strategy.AppendStrategy;
 import com.alibaba.cloud.ai.graph.state.strategy.ReplaceStrategy;
 import com.coderpwh.routing.graph.node.PostprocessNode;
 import com.coderpwh.routing.graph.node.PreprocessNode;
+import com.coderpwh.routing.graph.service.RoutingGraphService;
 import com.coderpwh.routing.graph.tools.GitHubStubTools;
 import com.coderpwh.routing.graph.tools.NotionStubTools;
 import com.coderpwh.routing.graph.tools.SlackStubTools;
@@ -205,6 +206,15 @@ public class RoutingGraphConfig {
     }
 
 
+    /**
+     * 路由服务
+     * @param routingGraph
+     * @return
+     */
+    @Bean
+    public RoutingGraphService routingGraphService(CompiledGraph routingGraph) {
+        return new RoutingGraphService(routingGraph);
+    }
 
 
 }
