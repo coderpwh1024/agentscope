@@ -14,4 +14,9 @@ public class SlackStubTools {
                 + " refresh flow'";
     }
 
+    @Tool(name = "get_thread", description = "Get a specific Slack thread.")
+    public String getThread(@ToolParam(name = "threadId", description = "Slack thread ID") String threadId) {
+        return "Thread discusses best practices for API key rotation";
+    }
+
 }
