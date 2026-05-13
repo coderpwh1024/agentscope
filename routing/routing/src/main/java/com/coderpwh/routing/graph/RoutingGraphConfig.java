@@ -2,6 +2,7 @@ package com.coderpwh.routing.graph;
 
 import com.alibaba.cloud.ai.agent.agentscope.AgentScopeAgent;
 import com.coderpwh.routing.graph.tools.GitHubStubTools;
+import com.coderpwh.routing.graph.tools.NotionStubTools;
 import io.agentscope.core.ReActAgent;
 import io.agentscope.core.memory.InMemoryMemory;
 import io.agentscope.core.model.DashScopeChatModel;
@@ -34,9 +35,11 @@ public class RoutingGraphConfig {
                     请回应以下请求：{slack_input}
                     """;
     private final GitHubStubTools gitHubStubTools;
+    private final NotionStubTools notionStubTools;
 
-    public RoutingGraphConfig(GitHubStubTools gitHubStubTools) {
+    public RoutingGraphConfig(GitHubStubTools gitHubStubTools, NotionStubTools notionStubTools) {
         this.gitHubStubTools = gitHubStubTools;
+        this.notionStubTools = notionStubTools;
     }
 
 
@@ -63,6 +66,28 @@ public class RoutingGraphConfig {
                 .description("Github specialist for code,issues,and PRS")
                 .instruction("please repoond to the following request:{github_input}.")
                 .outputKey("github_key")
+                .build();
+    }
+
+
+    @Bean
+    public AgentScopeAgent notionAgent() {
+        Toolkit toolkit = new Toolkit();
+        toolkit.registerTool(notionStubTools);
+
+        ReActAgent.Builder builder = ReActAgent.builder()
+                .name("notion")
+                .description("notion specialist for docs and wikis")
+                .sysPrompt(NOTION_PROMPT)
+                .model(dashScopeModel())
+                .toolkit(toolkit)
+                .memory(new InMemoryMemory());
+
+        return AgentScopeAgent.fromBuilder(builder)
+                .name("notion")
+                .description("Notion specialist for docs and wikis")
+                .instruction("Please respond to the following request: {notion_input}")
+                .outputKey("notion_key")
                 .build();
     }
 
