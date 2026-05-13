@@ -3,6 +3,7 @@ package com.coderpwh.routing.graph;
 import com.alibaba.cloud.ai.agent.agentscope.AgentScopeAgent;
 import com.coderpwh.routing.graph.tools.GitHubStubTools;
 import com.coderpwh.routing.graph.tools.NotionStubTools;
+import com.coderpwh.routing.graph.tools.SlackStubTools;
 import io.agentscope.core.ReActAgent;
 import io.agentscope.core.memory.InMemoryMemory;
 import io.agentscope.core.model.DashScopeChatModel;
@@ -48,6 +49,11 @@ public class RoutingGraphConfig {
         return DashScopeChatModel.builder().apiKey(key).modelName("qwen-plus").build();
     }
 
+
+    /***
+     * github
+     * @return
+     */
     @Bean
     public AgentScopeAgent githubAgent() {
         Toolkit toolkit = new Toolkit();
@@ -70,6 +76,10 @@ public class RoutingGraphConfig {
     }
 
 
+    /***
+     *  notion
+     * @return
+     */
     @Bean
     public AgentScopeAgent notionAgent() {
         Toolkit toolkit = new Toolkit();
@@ -88,6 +98,34 @@ public class RoutingGraphConfig {
                 .description("Notion specialist for docs and wikis")
                 .instruction("Please respond to the following request: {notion_input}")
                 .outputKey("notion_key")
+                .build();
+    }
+
+
+    /**
+     * slack
+     *
+     * @param slackStubTools
+     * @return
+     */
+    @Bean
+    public AgentScopeAgent slackAgent(SlackStubTools slackStubTools) {
+        Toolkit toolkit = new Toolkit();
+        toolkit.registerTool(slackStubTools);
+
+        ReActAgent.Builder builder = ReActAgent.builder()
+                .name("slack")
+                .description("Slack specialist for messages and threads")
+                .sysPrompt(SLACK_PROMPT)
+                .model(dashScopeModel())
+                .toolkit(toolkit)
+                .memory(new InMemoryMemory());
+
+        return AgentScopeAgent.fromBuilder(builder)
+                .name("slack")
+                .description("Slack specialist for messages and threads")
+                .instruction("Please respond to the following request: {slack_input}.")
+                .outputKey("slack_key")
                 .build();
     }
 
