@@ -1,0 +1,17 @@
+package com.coderpwh.routing.graph.tools;
+
+import io.agentscope.core.tool.Tool;
+import io.agentscope.core.tool.ToolParam;
+import org.springframework.stereotype.Component;
+
+@Component
+public class SlackStubTools {
+
+
+    @Tool(name = "search_slack", description = "Search Slack messages and threads")
+    public String searchSlack(@ToolParam(name = "query", description = "Search query") String query) {
+        return "Found discussion in #engineering: 'Use Bearer tokens for API auth, see docs for"
+                + " refresh flow'";
+    }
+
+}
