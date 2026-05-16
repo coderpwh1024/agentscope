@@ -3,10 +3,15 @@ package com.coderpwh.routing.simple;
 import com.alibaba.cloud.ai.agent.agentscope.flow.AgentScopeRoutingAgent;
 import com.coderpwh.routing.simple.state.AgentOutput;
 import com.coderpwh.routing.simple.state.Classification;
+import io.agentscope.core.message.Msg;
+import io.agentscope.core.message.MsgRole;
+import io.agentscope.core.message.TextBlock;
+import io.agentscope.core.model.ChatResponse;
 import io.agentscope.core.model.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.messages.Message;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 
@@ -40,17 +45,55 @@ public class RouterService {
     }
 
 
+    public String synthesize(String query, List<AgentOutput> results) {
+
+        if (results == null || results.isEmpty()) {
+            return "No results found from any knowledge source.";
+        }
+        String formatted =
+                results.stream()
+                        .map(r -> "**From " + capitalize(r.source()) + ":**\n" + r.result())
+                        .reduce((a, b) -> a + "\n\n" + b)
+                        .orElse("");
+
+        String systemPrompt = SYNTHESIZE_SYSTEM_TEMPLATE.formatted(query);
+
+        List<Msg> messages =
+                List.of(
+                        Msg.builder()
+                                .role(MsgRole.SYSTEM)
+                                .content(TextBlock.builder().text(systemPrompt).build())
+                                .build(),
+                        Msg.builder()
+                                .role(MsgRole.USER)
+                                .content(TextBlock.builder().text(formatted).build())
+                                .build());
 
 
+        Flux<ChatResponse> stream = model.stream(messages, null, null);
 
-
-   private static  String extraText(Object output){
-        if(output instanceof Message message){
-            return  message.getText();
+        ChatResponse last = stream.blockLast();
+        if (last == null || last.getContent() == null) {
+            return "";
         }
 
-        return  output!=null?output.toString():"";
-   }
+        StringBuilder text = new StringBuilder();
+        for (var block : last.getContent()) {
+            if (block instanceof TextBlock tb) {
+                text.append(tb.getText());
+            }
+        }
+        return text.toString();
+    }
+
+
+    private static String extraText(Object output) {
+        if (output instanceof Message message) {
+            return message.getText();
+        }
+
+        return output != null ? output.toString() : "";
+    }
 
     private static String capitalize(String s) {
         if (s == null || s.isEmpty()) {
