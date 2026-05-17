@@ -22,5 +22,13 @@ public class RoutingRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
 
+        String query = "How do I authenticate API requests?";
+
+        log.info("问题:{}",query);
+        RouterService.RouteResult result = routerService.run(query);
+        log.info("Classifications:");
+        result.classifications().forEach(c -> log.info("  {}: {}", c.source(), c.query()));
+        log.info("---");
+        log.info("最终答案:{}",result.finalAnswer());
     }
 }
