@@ -1,6 +1,9 @@
 package com.coderpwh.routing.simple;
 
 import com.alibaba.cloud.ai.agent.agentscope.flow.AgentScopeRoutingAgent;
+import com.alibaba.cloud.ai.graph.OverAllState;
+import com.alibaba.cloud.ai.graph.agent.flow.node.RoutingMergeNode;
+import com.alibaba.cloud.ai.graph.exception.GraphRunnerException;
 import com.coderpwh.routing.simple.state.AgentOutput;
 import com.coderpwh.routing.simple.state.Classification;
 import io.agentscope.core.message.Msg;
@@ -13,7 +16,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.messages.Message;
 import reactor.core.publisher.Flux;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
 
 /**
  * @author coderpwh
@@ -45,8 +51,68 @@ public class RouterService {
     }
 
 
+    public RouteResult run(String query) throws GraphRunnerException {
+        Optional<OverAllState> resultOpt = routingAgent.invoke(query);
+        if (resultOpt.isEmpty()) {
+            return new RouteResult(query, List.of(), List.of(), "No result from router");
+        }
+
+        OverAllState state = resultOpt.get();
+        String finalAnswer;
+
+        List<Classification> classifications = collectClassifications(state);
+        List<AgentOutput> results = collectAgentOutputs(state);
+        log.debug("Routed to {} sources: {}", classifications.size(), classifications);
+
+        Optional<Object> mergedOpt = state.value(RoutingMergeNode.DEFAULT_MERGED_OUTPUT_KEY);
+        if (mergedOpt.isPresent()) {
+            finalAnswer = extractText(mergedOpt.get());
+        } else {
+            finalAnswer = synthesize(query, results);
+        }
+        return new RouteResult(query, classifications, results, finalAnswer);
+
+    }
 
 
+
+    /***
+     *
+     * @param state
+     * @return
+     */
+    private List<Classification> collectClassifications(OverAllState state) {
+        List<Classification> list = new ArrayList<>();
+        for (String outputKey : OUTPUT_KEYS) {
+            Optional<Object> outputOpt = state.value(outputKey);
+            if (outputOpt.isPresent()) {
+                String agentName = outputKey.replace("_key", "");
+                String query = state.value(agentName + "_input").map(Object::toString).orElse("");
+                list.add(new Classification(agentName, query));
+            }
+        }
+        return list;
+    }
+
+
+    /**
+     * 智能体集合输出
+     *
+     * @param state
+     * @return
+     */
+    private List<AgentOutput> collectAgentOutputs(OverAllState state) {
+        List<AgentOutput> list = new ArrayList<>();
+        for (String outputKey : OUTPUT_KEYS) {
+            Optional<Object> outputOpt = state.value(outputKey);
+            if (outputOpt.isPresent()) {
+                String agentName = outputKey.replace("_key", "");
+                String result = RoutingMergeNode.extractText(outputOpt.get(), outputKey);
+                list.add(new AgentOutput(agentName, result));
+            }
+        }
+        return list;
+    }
 
 
     /**
@@ -98,13 +164,14 @@ public class RouterService {
     }
 
 
-    private static String extraText(Object output) {
+    private static String extractText(Object output) {
         if (output instanceof Message message) {
             return message.getText();
         }
-
         return output != null ? output.toString() : "";
     }
+
+
 
     private static String capitalize(String s) {
         if (s == null || s.isEmpty()) {
