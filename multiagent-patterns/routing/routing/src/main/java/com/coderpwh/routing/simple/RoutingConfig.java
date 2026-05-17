@@ -2,7 +2,7 @@ package com.coderpwh.routing.simple;
 
 import com.alibaba.cloud.ai.agent.agentscope.AgentScopeAgent;
 import com.alibaba.cloud.ai.agent.agentscope.flow.AgentScopeRoutingAgent;
-import com.coderpwh.routing.graph.tools.GitHubStubTools;
+import com.coderpwh.routing.simple.tools.GitHubStubTools;
 import com.coderpwh.routing.simple.tools.NotionStubTools;
 import com.coderpwh.routing.simple.tools.SlackStubTools;
 import io.agentscope.core.ReActAgent;
