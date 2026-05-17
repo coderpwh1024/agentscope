@@ -45,6 +45,17 @@ public class RouterService {
     }
 
 
+
+
+
+
+    /**
+     * 同步
+     *
+     * @param query
+     * @param results
+     * @return
+     */
     public String synthesize(String query, List<AgentOutput> results) {
 
         if (results == null || results.isEmpty()) {
