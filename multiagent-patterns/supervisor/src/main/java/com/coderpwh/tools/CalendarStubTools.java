@@ -6,11 +6,23 @@ import io.agentscope.core.tool.ToolParam;
 import java.util.List;
 
 /**
+ * 日历工具类
+ *
  * @author coderpwh
  */
 public class CalendarStubTools {
 
 
+    /**
+     * Create a calendar event.
+     *
+     * @param title
+     * @param startTime
+     * @param endTime
+     * @param attendees
+     * @param location
+     * @return
+     */
     @Tool(name = "create_calendar_event", description = "Create a calendar event. Requires exact ISO datetime format.")
     public String createCalendarEvent(
             @ToolParam(name = "title", description = "Event title") String title,
@@ -32,15 +44,22 @@ public class CalendarStubTools {
     }
 
 
+    /***
+     * 查询日历可用时间
+     * @param attendees
+     * @param date
+     * @param durationMinutes
+     * @return
+     */
     @Tool(
             name = "get_available_time_slots",
             description = "Check calendar availability for given attendees on a specific date.")
-    public String getAvailableTimeSlots(  @ToolParam(name = "attendees", description = "List of attendee email addresses")
-                                              List<String> attendees,
-                                          @ToolParam(name = "date", description = "Date in ISO format, e.g. 2024-01-15")
-                                              String date,
-                                          @ToolParam(name = "durationMinutes", description = "Duration in minutes")
-                                              int durationMinutes) {
+    public String getAvailableTimeSlots(@ToolParam(name = "attendees", description = "List of attendee email addresses")
+                                        List<String> attendees,
+                                        @ToolParam(name = "date", description = "Date in ISO format, e.g. 2024-01-15")
+                                        String date,
+                                        @ToolParam(name = "durationMinutes", description = "Duration in minutes")
+                                        int durationMinutes) {
         return "[\"09:00\", \"14:00\", \"16:00\"]";
 
     }
