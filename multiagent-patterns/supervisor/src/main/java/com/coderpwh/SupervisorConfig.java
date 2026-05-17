@@ -1,6 +1,14 @@
 package com.coderpwh;
 
+import io.agentscope.core.ReActAgent;
+import io.agentscope.core.memory.InMemoryMemory;
+import io.agentscope.core.model.DashScopeChatModel;
+import io.agentscope.core.model.Model;
+import io.agentscope.core.tool.Toolkit;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.StringUtils;
 
 /**
  * SupervisorConfig
@@ -36,5 +44,11 @@ public class SupervisorConfig {
             将用户请求拆解为相应的工具调用，并协调各项结果。\
             当一个请求涉及多个操作时，按顺序使用多个工具完成任务。
             """;
+
+    @Bean
+    public Model dashScopeChatModel(@Value("${spring.ai.dashscope.api-key:}") String apiKey) {
+        String key = StringUtils.hasText(apiKey) ? apiKey : System.getenv("AI_DASHSCOPE_API_KEY");
+        return DashScopeChatModel.builder().apiKey(key).modelName("qwen-plus").build();
+    }
 
 }
