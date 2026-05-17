@@ -10,6 +10,7 @@ import io.agentscope.core.memory.InMemoryMemory;
 import io.agentscope.core.model.DashScopeChatModel;
 import io.agentscope.core.model.Model;
 import io.agentscope.core.tool.Toolkit;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -110,9 +111,9 @@ public class RoutingConfig {
     @Bean
     public AgentScopeRoutingAgent routerAgent(
             Model dashScopeChatModel,
-            AgentScopeAgent githubAgent,
-            AgentScopeAgent notionAgent,
-            AgentScopeAgent slackAgent) {
+            @Qualifier("githubAgent") AgentScopeAgent githubAgent,
+            @Qualifier("notionAgent")   AgentScopeAgent notionAgent,
+            @Qualifier("slackAgent") AgentScopeAgent slackAgent) {
         return AgentScopeRoutingAgent.builder()
                 .name("router")
                 .model(dashScopeChatModel)
@@ -121,6 +122,12 @@ public class RoutingConfig {
                                 + " relevance.")
                 .subAgents(List.of(githubAgent, notionAgent, slackAgent))
                 .build();
+    }
+
+    @Bean
+    public RouterService routerService(
+            Model dashScopeChatModel, AgentScopeRoutingAgent routerAgent) {
+        return new RouterService(dashScopeChatModel, routerAgent);
     }
 
 
