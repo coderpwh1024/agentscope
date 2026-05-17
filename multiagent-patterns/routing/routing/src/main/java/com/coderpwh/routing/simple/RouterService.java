@@ -62,7 +62,7 @@ public class RouterService {
 
         List<Classification> classifications = collectClassifications(state);
         List<AgentOutput> results = collectAgentOutputs(state);
-        log.debug("Routed to {} sources: {}", classifications.size(), classifications);
+        log.info("Routed to {} sources: {}", classifications.size(), classifications);
 
         Optional<Object> mergedOpt = state.value(RoutingMergeNode.DEFAULT_MERGED_OUTPUT_KEY);
         if (mergedOpt.isPresent()) {
