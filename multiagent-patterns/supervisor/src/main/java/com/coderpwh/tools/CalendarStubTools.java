@@ -31,4 +31,18 @@ public class CalendarStubTools {
                 title, startTime, endTime, attendees != null ? attendees.size() : 0);
     }
 
+
+    @Tool(
+            name = "get_available_time_slots",
+            description = "Check calendar availability for given attendees on a specific date.")
+    public String getAvailableTimeSlots(  @ToolParam(name = "attendees", description = "List of attendee email addresses")
+                                              List<String> attendees,
+                                          @ToolParam(name = "date", description = "Date in ISO format, e.g. 2024-01-15")
+                                              String date,
+                                          @ToolParam(name = "durationMinutes", description = "Duration in minutes")
+                                              int durationMinutes) {
+        return "[\"09:00\", \"14:00\", \"16:00\"]";
+
+    }
+
 }
