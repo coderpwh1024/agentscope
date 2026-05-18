@@ -5,6 +5,7 @@ import io.agentscope.core.message.Msg;
 import io.agentscope.core.message.MsgRole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -30,7 +31,7 @@ public class SupervisorRunner implements ApplicationRunner {
     private final ReActAgent supervisorAgent;
 
 
-    public SupervisorRunner(ReActAgent supervisorAgent) {
+    public SupervisorRunner(@Qualifier("supervisorAgent") ReActAgent supervisorAgent) {
         this.supervisorAgent = supervisorAgent;
     }
 

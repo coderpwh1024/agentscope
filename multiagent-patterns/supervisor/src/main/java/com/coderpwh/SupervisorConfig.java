@@ -7,7 +7,7 @@ import io.agentscope.core.memory.InMemoryMemory;
 import io.agentscope.core.model.DashScopeChatModel;
 import io.agentscope.core.model.Model;
 import io.agentscope.core.tool.Toolkit;
-import org.checkerframework.checker.units.qual.C;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -126,7 +126,7 @@ public class SupervisorConfig {
      * @return
      */
     @Bean("supervisorAgent")
-    public ReActAgent supervisorAgent(Model model, ReActAgent calendarAgent, ReActAgent emailAgent) {
+    public ReActAgent supervisorAgent(Model model, @Qualifier("calendarAgent")ReActAgent calendarAgent, @Qualifier("emailAgent") ReActAgent emailAgent) {
         Toolkit toolkit = new Toolkit();
         toolkit.registerTool(calendarAgent);
         toolkit.registerTool(emailAgent);
