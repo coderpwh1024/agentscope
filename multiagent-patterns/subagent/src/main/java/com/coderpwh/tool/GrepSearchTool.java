@@ -1,4 +1,4 @@
-package com.coderpwh;
+package com.coderpwh.tool;
 
 import java.nio.file.Path;
 
@@ -14,6 +14,12 @@ public class GrepSearchTool {
     public GrepSearchTool(Path workspacePath) {
         this.workspacePath = workspacePath.toAbsolutePath().normalize();
     }
+
+    public String grepSearch(){
+
+        return "grepSearch";
+    }
+
 
 
 
