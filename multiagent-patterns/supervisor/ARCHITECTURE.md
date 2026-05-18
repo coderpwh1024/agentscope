@@ -73,6 +73,8 @@ flowchart TD
     S -- "汇总回复" --> U
 ```
 
+![整体架构图](diagrams/01-architecture.png)
+
 **关键架构思想**：三个 `ReActAgent` 形成 **两层树状层级**。
 子智能体（Calendar / Email）对主管而言，外观上就是一个「工具」
 （`toolkit.registerTool(calendarAgent)`）。主管不需要知道日历内部如何解析时间，
@@ -103,6 +105,8 @@ flowchart TD
     F --> B
     D -- 否 --> G[生成最终回复 Msg] --> H[返回调用方]
 ```
+
+![ReAct Agent 工作原理](diagrams/02-react-loop.png)
 
 **精妙之处**：当"工具"是子智能体时，`(Act)` 这一步实际上**触发了子智能体一整轮完整的 ReAct 循环**——递归嵌套。
 
@@ -183,6 +187,8 @@ flowchart TD
     B --> F["ApplicationReadyEvent → 打印 🎉 启动横幅"]
 ```
 
+![Spring Boot 启动生命周期](diagrams/03-springboot-lifecycle.png)
+
 - `@ConditionalOnProperty`：开关控制是否跑 Demo，默认不开则不调模型（省钱 / 可控）。
 - `@Qualifier`：容器里有 3 个 `ReActAgent` Bean，注入需用
   `@Qualifier("supervisorAgent")` 等消除歧义。
@@ -210,6 +216,8 @@ sequenceDiagram
     S-->>U: "已为你安排明天上午9点的团队站会"
 ```
 
+![场景A：单域请求时序图](diagrams/04-scenario-a-sequence.png)
+
 ### 场景 B：多域请求 —— "开会 + 发邮件提醒"（编排核心展示）
 
 ```mermaid
@@ -230,6 +238,8 @@ sequenceDiagram
     E-->>S: "Email sent to ... - Subject: ..."
     S-->>U: "会议已安排,提醒邮件已发送"
 ```
+
+![场景B：多域编排时序图](diagrams/05-scenario-b-sequence.png)
 
 > 场景 B 是项目**点睛之笔**：演示 Supervisor 如何把"一句复合指令"
 > 拆成有序的多次子智能体调用并汇总——即**多智能体编排（orchestration）**。

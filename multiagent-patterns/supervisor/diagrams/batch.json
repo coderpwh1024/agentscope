@@ -1,0 +1,50 @@
+{
+  "jobs": 3,
+  "tasks": [
+    {
+      "id": "01-architecture",
+      "promptFiles": ["prompts/01-architecture.md"],
+      "image": "01-architecture.png",
+      "provider": "dashscope",
+      "model": "qwen-image-2.0-pro",
+      "size": "1440x1080",
+      "quality": "2k"
+    },
+    {
+      "id": "02-react-loop",
+      "promptFiles": ["prompts/02-react-loop.md"],
+      "image": "02-react-loop.png",
+      "provider": "dashscope",
+      "model": "qwen-image-2.0-pro",
+      "size": "1080x1440",
+      "quality": "2k"
+    },
+    {
+      "id": "03-springboot-lifecycle",
+      "promptFiles": ["prompts/03-springboot-lifecycle.md"],
+      "image": "03-springboot-lifecycle.png",
+      "provider": "dashscope",
+      "model": "qwen-image-2.0-pro",
+      "size": "1080x1440",
+      "quality": "2k"
+    },
+    {
+      "id": "04-scenario-a-sequence",
+      "promptFiles": ["prompts/04-scenario-a-sequence.md"],
+      "image": "04-scenario-a-sequence.png",
+      "provider": "dashscope",
+      "model": "qwen-image-2.0-pro",
+      "size": "1080x1920",
+      "quality": "2k"
+    },
+    {
+      "id": "05-scenario-b-sequence",
+      "promptFiles": ["prompts/05-scenario-b-sequence.md"],
+      "image": "05-scenario-b-sequence.png",
+      "provider": "dashscope",
+      "model": "qwen-image-2.0-pro",
+      "size": "1080x1920",
+      "quality": "2k"
+    }
+  ]
+}
