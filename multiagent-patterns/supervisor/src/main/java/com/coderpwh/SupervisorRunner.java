@@ -43,7 +43,7 @@ public class SupervisorRunner implements ApplicationRunner {
      */
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        String query1 = "Schedule a team standup for tomorrow at 9am";
+        String query1 = "安排明天上午9点的团队站会";
         log.info("用户问题1:{}", query1);
         log.info("---");
         Msg response1 = supervisorAgent.call(buildUserMsg(query1)).block();
@@ -51,8 +51,8 @@ public class SupervisorRunner implements ApplicationRunner {
         log.info("-------------------------------------------------------------------------");
 
         String query2 =
-                "Schedule a meeting with the design team next Tuesday at 2pm for 1 hour, "
-                        + "and send them an email reminder about reviewing the new mockups.";
+                "下周二下午2点安排一个与设计团队的1小时会议，"
+                        + "并给他们发送一封邮件提醒，内容是审查新的设计稿。";
         log.info("用户问题1{}", query2);
         log.info("---");
         Msg response2 = supervisorAgent.call(buildUserMsg(query2)).block();
