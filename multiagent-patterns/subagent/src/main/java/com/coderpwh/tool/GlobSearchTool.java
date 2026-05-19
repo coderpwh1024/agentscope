@@ -32,6 +32,7 @@ public class GlobSearchTool {
             "                            + \" the workspace.")
     public String globSearch(String pattern) {
 
+
         if (pattern == null || pattern.isBlank()) {
             return "Error: pattern is required.";
         }
