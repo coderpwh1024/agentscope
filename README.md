@@ -1,6 +1,8 @@
 # AgentScope Java Examples 学习路线
 
-> 基于 [agentscope-ai/agentscope-java](https://github.com/agentscope-ai/agentscope-java/tree/main/agentscope-examples) 仓库，按"能力依赖关系 + 由浅入深"整理的学习/实现顺序。
+> 基于 [agentscope-ai/agentscope-java](https://github.com/agentscope-ai/agentscope-java/tree/main/agentscope-examples) 仓库,按"能力依赖关系 + 由浅入深"整理的学习/实现顺序。
+>
+> 官方 examples 现已按 **agents / documentation / integration / multiagent-patterns** 四大类组织,本文档对照该分类标记完成进度。
 
 ## 目录
 
@@ -17,30 +19,46 @@
 
 ## 进度概览
 
-### ✅ 已完成(4 个)
+### ✅ 已完成(8 个)
 
-| Example | 说明 |
-|---|---|
-| `quickstart` | 入门,ReActAgent 基本用法、Session 持久化等 |
-| `advanced` | 进阶特性 |
-| `chat-tts` | Qwen TTS 模型集成 |
-| `hitl-chat` | Human-in-the-Loop + MCP 工具确认 |
+| 分类 | Example | 说明 |
+|---|---|---|
+| documentation | `quickstart` | 入门,ReActAgent 基本用法、Session 持久化等 |
+| documentation | `advanced` | 进阶特性 |
+| documentation | `chat-tts` | Qwen TTS 模型集成 |
+| documentation | `hitl-chat` | Human-in-the-Loop + MCP 工具确认 |
+| multiagent-patterns | `pipeline` | Sequential / Fanout 等流水线编排 |
+| multiagent-patterns | `routing` | 路由模式(Graph vs Simple 已对比) |
+| multiagent-patterns | `subagent` | Sub Agent 拆分协作 |
+| multiagent-patterns | `supervisor` | Supervisor + Sub Agents 监督式协作(含 ARCHITECTURE.md) |
 
-### ⏳ 待完成(13 个)
+### ⏳ 待完成(16 个)
 
-a2a-rocketmq、a2a、agui、boba-tea-shop、chat-completions-web、graceful-shutdown、micronaut、model-request-compression、multiagent-patterns、plan-notebook、quarkus、werewolf-hitl、werewolf
+**multiagent-patterns 剩余(3 个):** `handoffs`、`skills`、`workflow`
+
+**documentation(7 个):** `a2a`、`chat-completions-web`、`graceful-shutdown`、`model-request-compression`、`plan-notebook`、`werewolf-hitl`、`werewolf`
+
+**integration(4 个):** `a2a-rocketmq`、`agui`、`micronaut`、`quarkus`
+
+**agents(2 个):** `boba-tea-shop`、`harness-examples`(含 6 个子项目)
 
 ---
 
 ## 阶段 1:核心能力补完
 
-> 单 Agent 能力的剩余拼图,为后续多 Agent 场景打基础。
+> 单 Agent 能力的剩余拼图,以及多 Agent 模式手册的收尾,为后续场景打基础。
 
-### 1. multiagent-patterns ⭐ 优先做
+### 1. multiagent-patterns 剩余子项目 ⭐ 优先做
 
-- 多 Agent 协作的"模式手册"(Sequential、Parallel、Router、Handoff 等 Pipeline / MsgHub 用法)
-- 这是后面所有多 Agent example 的基础,必须先打通
-- 对应 Python 版的 pipeline 概念
+- ✅ `pipeline` 已完成 — Sequential / Fanout 等流水线编排
+- ✅ `routing` 已完成 — Routing 模式(已沉淀 `routing-graph-vs-simple对比文档.md`)
+- ✅ `subagent` 已完成 — Sub Agent 拆分协作
+- ✅ `supervisor` 已完成 — Supervisor + Sub Agents 监督式协作(已沉淀 `ARCHITECTURE.md`)
+- ⏳ `handoffs` 待做 — Agent 间任务移交(Handoff)模式
+- ⏳ `skills` 待做 — Skill/能力注册与组合
+- ⏳ `workflow` 待做 — 工作流式多 Agent 编排
+
+这是后面所有多 Agent example 的基础。剩余 3 个补完后,即可进入 werewolf / boba-tea-shop 等综合场景。
 
 ### 2. plan-notebook
 
@@ -120,11 +138,17 @@ a2a-rocketmq、a2a、agui、boba-tea-shop、chat-completions-web、graceful-shut
 - 用 brotli 压缩模型请求体,省带宽
 - 偏优化技巧,独立小特性,最后做
 
+### 13. harness-examples
+
+- 官方新增,Agent 运行环境(harness)系列示例:
+  - `harness-quickstart`、`harness-example-common`、`harness-example-local`、`harness-example-remote`、`harness-example-sandbox`、`harness-sandbox-docker`
+- 关注"在不同执行环境/沙箱下运行 Agent"的工程化能力
+
 ---
 
 ## 阶段 5:终极综合 Demo
 
-### 13. boba-tea-shop ⭐ 收官项目
+### 14. boba-tea-shop ⭐ 收官项目
 
 - AgentScope Java 的"旗舰 demo",奶茶店多 Agent 系统
 - 涉及:Supervisor + Sub Agents、RAG、长期记忆、MCP Server、Nacos、Spring Boot 多模块
@@ -150,20 +174,28 @@ advanced ✓        ┐
 chat-tts ✓        ├─ 已完成
 hitl-chat ✓       ┘
        ↓
-[1] multiagent-patterns ─┬→ [8] werewolf ─→ [9] werewolf-hitl
-       ↓                  │
-[2] plan-notebook         │
-[3] graceful-shutdown     │
-       ↓                  │
-[4] chat-completions-web  │
-[5] agui                  │
+multiagent-patterns/
+  ├─ pipeline   ✓
+  ├─ routing    ✓
+  ├─ subagent   ✓
+  ├─ supervisor ✓
+  ├─ handoffs   ⏳ ─┐
+  ├─ skills     ⏳ ─┼→ [8] werewolf ─→ [9] werewolf-hitl
+  └─ workflow   ⏳ ─┘
+       ↓
+[2] plan-notebook
+[3] graceful-shutdown
+       ↓
+[4] chat-completions-web
+[5] agui
 [6] a2a ─→ [7] a2a-rocketmq
-       ↓                  │
-[10] micronaut (可选)      │
-[11] quarkus  (可选)       │
+       ↓
+[10] micronaut          (可选)
+[11] quarkus            (可选)
 [12] model-request-compression (可选)
-       ↓                  │
-[13] boba-tea-shop ←──────┘  (终极综合)
+[13] harness-examples   (可选,工程化沙箱)
+       ↓
+[14] boba-tea-shop ←──── (终极综合)
 ```
 
 ---
@@ -175,10 +207,10 @@ hitl-chat ✓       ┘
 ### 时间紧 / 快速覆盖核心
 
 ```
-1 → 2 → 5 → 6 → 13
+multiagent-patterns 剩余(handoffs/skills/workflow) → plan-notebook → agui → a2a → boba-tea-shop
 ```
 
-multiagent-patterns → plan-notebook → agui → a2a → boba-tea-shop,覆盖 80% 核心能力。
+覆盖 80% 核心能力。
 
 ### 写技术分享 / 博客
 
@@ -192,6 +224,7 @@ multiagent-patterns → plan-notebook → agui → a2a → boba-tea-shop,覆盖 
 - `agui` — 前端集成
 - `a2a` — 分布式 Agent
 - `model-request-compression` — 性能优化
+- `harness-examples` — 沙箱/远程执行
 
 游戏 demo(werewolf)反而不是重点。
 
