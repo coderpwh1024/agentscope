@@ -21,26 +21,46 @@
 
 ### ✅ 已完成(8 个)
 
-| 分类 | Example | 说明 |
-|---|---|---|
-| documentation | `quickstart` | 入门,ReActAgent 基本用法、Session 持久化等 |
-| documentation | `advanced` | 进阶特性 |
-| documentation | `chat-tts` | Qwen TTS 模型集成 |
-| documentation | `hitl-chat` | Human-in-the-Loop + MCP 工具确认 |
-| multiagent-patterns | `pipeline` | Sequential / Fanout 等流水线编排 |
-| multiagent-patterns | `routing` | 路由模式(Graph vs Simple 已对比) |
-| multiagent-patterns | `subagent` | Sub Agent 拆分协作 |
-| multiagent-patterns | `supervisor` | Supervisor + Sub Agents 监督式协作(含 ARCHITECTURE.md) |
+| 状态 | 分类 | Example | 说明 | 沉淀产出 |
+|---|---|---|---|---|
+| ✅ | documentation | `quickstart` | 入门,ReActAgent 基本用法、Session 持久化等 | - |
+| ✅ | documentation | `advanced` | 进阶特性 | - |
+| ✅ | documentation | `chat-tts` | Qwen TTS 模型集成 | - |
+| ✅ | documentation | `hitl-chat` | Human-in-the-Loop + MCP 工具确认 | - |
+| ✅ | multiagent-patterns | `pipeline` | Sequential / Fanout 等流水线编排 | `PIPELINE_ANALYSIS.md` |
+| ✅ | multiagent-patterns | `routing` | 路由模式(Graph vs Simple) | `routing-graph-vs-simple对比文档.md` |
+| ✅ | multiagent-patterns | `subagent` | Sub Agent 拆分协作 | - |
+| ✅ | multiagent-patterns | `supervisor` | Supervisor + Sub Agents 监督式协作 | `ARCHITECTURE.md` + diagrams |
 
-### ⏳ 待完成(16 个)
+### ⏳ 待完成(16 个,按推荐学习顺序排列)
 
-**multiagent-patterns 剩余(3 个):** `handoffs`、`skills`、`workflow`
+| 状态 | 顺序 | 分类 | Example | 阶段 | 说明 | 难度 | 前置依赖 |
+|---|---|---|---|---|---|---|---|
+| ⏳ | 1 | multiagent-patterns | `handoffs` | 阶段1 | Agent 间任务移交(Handoff)模式 | ★★ | - |
+| ⏳ | 2 | multiagent-patterns | `skills` | 阶段1 | Skill / 能力注册与组合 | ★★ | - |
+| ⏳ | 3 | multiagent-patterns | `workflow` | 阶段1 | 工作流式多 Agent 编排 | ★★ | pipeline ✓ |
+| ⏳ | 4 | documentation | `plan-notebook` | 阶段1 | 结构化任务分解,招牌特性 | ★★ | - |
+| ⏳ | 5 | documentation | `graceful-shutdown` | 阶段1 | Safe Interruption / Graceful Cancellation | ★ | - |
+| ⏳ | 6 | documentation | `chat-completions-web` | 阶段2 | OpenAI Chat Completions 兼容接口 | ★ | - |
+| ⏳ | 7 | integration | `agui` | 阶段2 | AG-UI 协议 + Spring Boot starter | ★★ | - |
+| ⏳ | 8 | documentation | `a2a` | 阶段2 | Agent2Agent 协议 + Nacos 注册发现 | ★★★ | - |
+| ⏳ | 9 | integration | `a2a-rocketmq` | 阶段2 | a2a 的消息队列异步变体 | ★★★ | a2a |
+| ⏳ | 10 | documentation | `werewolf` | 阶段3 | 狼人杀多 Agent 协作经典 demo | ★★★ | multiagent-patterns 全套 |
+| ⏳ | 11 | documentation | `werewolf-hitl` | 阶段3 | werewolf + Human-in-the-Loop | ★★★ | werewolf、hitl-chat ✓ |
+| ⏳ | 12 | integration | `micronaut` | 阶段4 | Micronaut 框架集成(按需) | ★★ | - |
+| ⏳ | 13 | integration | `quarkus` | 阶段4 | Quarkus + GraalVM native image(按需) | ★★★ | - |
+| ⏳ | 14 | documentation | `model-request-compression` | 阶段4 | brotli 压缩模型请求体(性能) | ★ | - |
+| ⏳ | 15 | agents | `harness-examples` | 阶段4 | Agent 运行环境/沙箱(含 6 子项目) | ★★★ | - |
+| ⏳ | 16 | agents | `boba-tea-shop` ⭐ | 阶段5 | 旗舰综合 demo:奶茶店多 Agent 系统 | ★★★★ | 前面几乎全部 |
 
-**documentation(7 个):** `a2a`、`chat-completions-web`、`graceful-shutdown`、`model-request-compression`、`plan-notebook`、`werewolf-hitl`、`werewolf`
+> 难度:★ 入门 / ★★ 进阶 / ★★★ 较难 / ★★★★ 综合
 
-**integration(4 个):** `a2a-rocketmq`、`agui`、`micronaut`、`quarkus`
+#### 按分类速览
 
-**agents(2 个):** `boba-tea-shop`、`harness-examples`(含 6 个子项目)
+- **multiagent-patterns 剩余(3 个):** `handoffs`、`skills`、`workflow`
+- **documentation(7 个):** `plan-notebook`、`graceful-shutdown`、`chat-completions-web`、`a2a`、`werewolf`、`werewolf-hitl`、`model-request-compression`
+- **integration(4 个):** `agui`、`a2a-rocketmq`、`micronaut`、`quarkus`
+- **agents(2 个):** `harness-examples`(6 子项目)、`boba-tea-shop`
 
 ---
 
